@@ -2,12 +2,12 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>麥塊公主大冒險 × 怪獸訓練家｜雙人知識對戰</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#1a1c2c;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:"Microsoft JhengHei","PingFang TC",sans-serif;}
-#wrap{position:relative;width:min(960px,100vw);}
+#wrap{position:relative;width:min(960px,100vw,177.7vh);}
 canvas{display:block;width:100%;image-rendering:pixelated;background:#79c6f5;}
 .quiz{position:absolute;left:0;width:100%;height:50%;display:flex;align-items:center;justify-content:center;z-index:5;}
 #quizP1{top:0}#quizP2{top:50%}
@@ -46,12 +46,39 @@ kbd{background:#333;border:1px solid #777;border-bottom:3px solid #777;padding:1
 .bigbtn:active{transform:translateY(4px);box-shadow:0 2px 0 #8a5f05;}
 #endStats{margin:10px 0 14px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
 .muteBtn{position:absolute;top:6px;right:8px;z-index:8;font-family:inherit;font-size:13px;background:rgba(0,0,0,.5);color:#fff;border:2px solid #888;cursor:pointer;padding:2px 8px;}
+/* 手機觸控按鈕 */
+.tbtn{position:absolute;width:54px;height:54px;border-radius:12px;z-index:4;
+  background:rgba(0,0,0,.32);border:2px solid rgba(255,255,255,.55);color:#fff;
+  font-size:24px;display:none;align-items:center;justify-content:center;
+  user-select:none;-webkit-user-select:none;touch-action:none;}
+.tbtn:active{background:rgba(255,255,255,.35);}
+.touch .tbtn{display:flex;}
+#t1l{left:2%;top:31%;}   #t1r{left:calc(2% + 62px);top:31%;}
+#t1j{right:2%;top:31%;}  #t1z{right:calc(2% + 62px);top:31%;}
+#t2l{left:2%;bottom:7%;} #t2r{left:calc(2% + 62px);bottom:7%;}
+#t2j{right:2%;bottom:7%;}#t2z{right:calc(2% + 62px);bottom:7%;}
+#rotateHint{display:none;position:fixed;inset:0;z-index:99;background:rgba(10,8,20,.95);
+  color:#ffd84d;font-size:22px;font-weight:bold;align-items:center;justify-content:center;text-align:center;}
+@media (orientation:portrait) and (pointer:coarse){#rotateHint{display:flex;}}
+@media (max-width:760px){
+  h1{font-size:20px;} .sub{font-size:12px;} .rules{font-size:11px;line-height:1.7;}
+  .card{min-width:200px;font-size:11px;padding:6px 10px;} .card b{font-size:13px;}
+  .bigbtn{font-size:17px;padding:9px 30px;}
+  .qtext{font-size:15px;} .qbtn{font-size:13px;padding:5px 8px;}
+  .qtip,.qexp{font-size:11px;} .qtag,.qwho,.qtimer{font-size:11px;}
+  .qbox{padding:8px 10px;}
+}
 </style>
 </head>
 <body>
 <div id="wrap">
   <canvas id="game" width="960" height="540"></canvas>
   <button class="muteBtn" id="btnMute">🎵 音樂開</button>
+  <div class="tbtn" id="t1l">◀</div><div class="tbtn" id="t1r">▶</div>
+  <div class="tbtn" id="t1j">🆙</div><div class="tbtn" id="t1z">⚡</div>
+  <div class="tbtn" id="t2l">◀</div><div class="tbtn" id="t2r">▶</div>
+  <div class="tbtn" id="t2j">🆙</div><div class="tbtn" id="t2z">⚡</div>
+  <div id="rotateHint">📱 請將手機轉成橫向遊玩 🔄</div>
 
   <div id="quizP1" class="quiz hidden"><div class="qbox">
     <div class="qtop"><span class="qtag"></span><span class="qwho" style="color:#9fe0ff">🌟 羅潔塔姐姐作答（按 1‑4）</span><span class="qtimer"></span></div>
@@ -89,7 +116,8 @@ kbd{background:#333;border:1px solid #777;border-bottom:3px solid #777;padding:1
       🟨 頂「<b>？問號方塊</b>」出考題（<b>數學・英語・國語</b>輪流，附解析訂正）；英語題會自動朗讀，可按 🔊 再聽<br>
       ✅ 答對 → <b>⚡加速 6 秒</b>；每答對 2 題<b>收服 1 隻寵物</b>跟著你跑（集滿 6 隻圖鑑 +10 金幣）<br>
       🔥 連續答對 3 題 → 獲得 <b>⚡電擊道具</b>，可把對手凍結 2 秒！　❌ 答錯或超時 → ❄️凍結 2 秒<br>
-      💥 踩苦力怕頭 +2 金幣；掉岩漿回安全點。按 <kbd>M</kbd> 開關音樂。
+      🏁 <b>答對 15 題</b>並抵達終點旗杆才算獲勝！沒答夠碰旗子也沒用喔<br>
+      💥 踩苦力怕頭 +2 金幣；掉岩漿回安全點。按 <kbd>M</kbd> 開關音樂。📱 手機請轉橫向，畫面上有觸控按鍵（🆙連點兩下＝二段跳）
     </div>
     <button class="bigbtn" id="btnStart">🎮 開始對戰</button>
   </div></div>
@@ -107,12 +135,15 @@ kbd{background:#333;border:1px solid #777;border-bottom:3px solid #777;padding:1
 'use strict';
 //==================== 基本常數 ====================
 const T=32, ROWS=15, COLS=240, W=960, H=540, VH=270, WORLDH=ROWS*T;
+const WIN_CORRECT=15;   // 要答對幾題才能碰旗杆獲勝
 const cv=document.getElementById('game'), ctx=cv.getContext('2d');
 let grid=[], enemies=[], particles=[], texts=[], flagX=COLS-10, state='start', winner=null, frame=0;
+let viewP=null;   // 目前正在繪製哪位玩家的視角
 
 //==================== 音效與音樂 ====================
 let AC=null;
-function initAudio(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } }
+function initAudio(){ if(!AC){ try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} }
+  if(AC&&AC.state==='suspended')AC.resume(); }
 function toneAt(f,d,type,v,t){ if(!AC)return; const o=AC.createOscillator(),g=AC.createGain();
   o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,t);
   g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d);}
@@ -165,7 +196,8 @@ function makePlayer(name,cfg){
   return Object.assign({name,x:64,y:11*T,w:24,h:44,vx:0,vy:0,dir:1,onGround:false,
     coins:0,correct:0,wrongN:0,streak:0,bestStreak:0,answeredCount:0,charges:0,zapT:0,
     boostT:0,stunT:0,invT:0,frozen:false,quiz:null,jumpBuf:0,jumpsLeft:2,
-    safeX:64,safeY:372,stunAfter:false,grade:'grade2',pets:[],petOrder:[]},cfg);
+    safeX:64,safeY:372,stunAfter:false,grade:'grade2',pets:[],petOrder:[],
+    usedQ:new Set(),flagMsgT:0},cfg);
 }
 const p1=makePlayer('羅潔塔姐姐',{spawn:64, dress:'#5bc8e8',dress2:'#3a9fc0',hair:'#f5e6a8',
   keys:{l:'KeyA',r:'KeyD',j:'KeyW',atk:'KeyS'},ansKeys:['1','2','3','4'],hud:'#9fe0ff'});
@@ -188,14 +220,17 @@ function buildLevel(){
   let x=0;
   for(;x<16;x++)ground(x);
   grid[9][8]=5; grid[9][12]=5;
-  while(x<COLS-26){
-    const pat=irnd(7);
+  while(x<COLS-28){
+    const pat=irnd(8);
     if(pat===0){ const w=2+irnd(2);
       for(let i=0;i<w;i++){grid[14][x+i]=10;x++;}
       for(let i=0;i<4;i++){ground(x);x++;}
-    }else if(pat===1){ const n=2+irnd(3);
-      for(let i=0;i<n;i++){ground(x);grid[9][x]=(i%2===0)?5:(Math.random()<.5?4:5);
-        if(Math.random()<.4)grid[7][x]=7; x++;}
+    }else if(pat===1||pat===6){ // 問號方塊區（加量）
+      const n=3;
+      for(let i=0;i<n;i++){ground(x);grid[9][x]=5;
+        if(i===1&&Math.random()<.4)grid[6][x]=5;       // 高處問號，要二段跳
+        else if(Math.random()<.3)grid[7][x]=7;
+        x++;}
       ground(x);x++;
     }else if(pat===2){ const h=1+irnd(2),len=3+irnd(3);
       for(let i=0;i<len;i++){ground(x,h);if(Math.random()<.3)grid[13-h-3][x]=7;x++;}
@@ -213,6 +248,7 @@ function buildLevel(){
     }
   }
   for(;x<COLS;x++)ground(x);
+  for(let i=0;i<6;i++)grid[9][COLS-27+i*2]=5;   // 終點前補題區：沒答夠在這裡補
   flagX=COLS-12;
 }
 
@@ -443,7 +479,9 @@ function updatePlayer(p){
    else if(p.vy<0){const r=Math.floor(p.y/T);
      for(let c=x0;c<=x1;c++){const t=tileAt(c,r);
        if(solid(t)){p.y=(r+1)*T;p.vy=0;
-         if(t===5){grid[r][c]=6;spawnParts(c*T+16,r*T+32,'#e9a823',8,3);openQuiz(p);}
+         if(t===5&&!p.quiz){const k=c+','+r;
+           if(!p.usedQ.has(k)){p.usedQ.add(k);
+             spawnParts(c*T+16,r*T+32,'#e9a823',8,3);openQuiz(p);}}
          break;}}}}
   // 金幣
   {const x0=Math.floor(p.x/T),x1=Math.floor((p.x+p.w-1)/T),
@@ -466,8 +504,13 @@ function updatePlayer(p){
     panelOf(p).querySelector('.qtimer').textContent='⏰ '+Math.ceil(p.quiz.timer/60)+' 秒';
     if(p.quiz.timer<=0)answerQuiz(p,-1);}
   updatePets(p);
-  // 抵達終點
-  if(state==='play'&&p.x+p.w>flagX*T+8){state='end';winner=p;stopBGM();sfx.win();setTimeout(showEnd,800);}
+  // 抵達終點：要答對 15 題才算贏
+  if(p.flagMsgT>0)p.flagMsgT--;
+  if(state==='play'&&p.x+p.w>flagX*T+8){
+    if(p.correct>=WIN_CORRECT){state='end';winner=p;stopBGM();sfx.win();setTimeout(showEnd,800);}
+    else if(p.flagMsgT<=0){p.flagMsgT=150;sfx.hurt();
+      toast(p.x+12,p.y-34,'還差 '+(WIN_CORRECT-p.correct)+' 題！回頭找？方塊','#ff8589');}
+  }
 }
 
 //==================== 敵人（苦力怕）====================
@@ -502,10 +545,16 @@ function drawTile(t,c,r){
   else if(t===3){ctx.fillStyle='#8d8d8d';ctx.fillRect(x,y,T,T);speckle(x,y,c,r,'#6f6f6f','#a5a5a5');}
   else if(t===4){ctx.fillStyle='#b8945f';ctx.fillRect(x,y,T,T);speckle(x,y,c,r,'#9a7747','#c8a571');
     ctx.fillStyle='#9a7747';ctx.fillRect(x,y+10,T,2);ctx.fillRect(x,y+22,T,2);}
-  else if(t===5){ctx.fillStyle='#e9a823';ctx.fillRect(x,y,T,T);speckle(x,y,c,r,'#c98a10','#f5c14d');
-    ctx.strokeStyle='#7a5403';ctx.lineWidth=3;ctx.strokeRect(x+2,y+2,T-4,T-4);
-    ctx.fillStyle='#fff';ctx.font='bold 20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    const bob=Math.sin(frame/12+c)*1.5;ctx.fillText('?',x+T/2,y+T/2+bob);ctx.textAlign='left';ctx.textBaseline='alphabetic';}
+  else if(t===5){
+    if(viewP&&viewP.usedQ.has(c+','+r)){ // 這位玩家已撞過 → 顯示為用過的方塊
+      ctx.fillStyle='#9a7a4a';ctx.fillRect(x,y,T,T);speckle(x,y,c,r,'#7d6038','#ab8b58');
+      ctx.strokeStyle='#5e4827';ctx.lineWidth=3;ctx.strokeRect(x+2,y+2,T-4,T-4);
+    }else{
+      ctx.fillStyle='#e9a823';ctx.fillRect(x,y,T,T);speckle(x,y,c,r,'#c98a10','#f5c14d');
+      ctx.strokeStyle='#7a5403';ctx.lineWidth=3;ctx.strokeRect(x+2,y+2,T-4,T-4);
+      ctx.fillStyle='#fff';ctx.font='bold 20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      const bob=Math.sin(frame/12+c)*1.5;ctx.fillText('?',x+T/2,y+T/2+bob);ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    }}
   else if(t===6){ctx.fillStyle='#9a7a4a';ctx.fillRect(x,y,T,T);speckle(x,y,c,r,'#7d6038','#ab8b58');
     ctx.strokeStyle='#5e4827';ctx.lineWidth=3;ctx.strokeRect(x+2,y+2,T-4,T-4);}
   else if(t===7){const ph=Math.abs(Math.cos(frame/10+c*.7));const w=4+12*ph;
@@ -589,7 +638,9 @@ function drawFlagAndCastle(){
   ctx.fillRect(cx+2*T+8,cy+2.5*T,T+16,3.5*T);
   ctx.fillStyle='#2c1a0a';ctx.fillRect(cx+2*T+16,cy+2.5*T+8,T,3*T);
   ctx.font='bold 18px sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';
-  ctx.fillText('🏁 終點', cx+3*T, cy-30);ctx.textAlign='left';
+  ctx.fillText('🏁 終點', cx+3*T, cy-30);
+  ctx.font='bold 13px "Microsoft JhengHei",sans-serif';ctx.fillStyle='#ffd84d';
+  ctx.fillText('要答對 '+WIN_CORRECT+' 題才能贏！', cx+3*T, cy-10);ctx.textAlign='left';
 }
 function drawWorld(camx,camy){
   const c0=Math.max(0,(camx/T)|0),c1=Math.min(COLS-1,((camx+W)/T)|0);
@@ -630,7 +681,7 @@ function drawHUD(p,vy){
   ctx.font='bold 13px "Microsoft JhengHei",sans-serif';
   ctx.fillStyle=p.hud;ctx.fillRect(10,vy+10,13,13);
   ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.strokeRect(10,vy+10,13,13);
-  let txt=p.name+'〔'+GRADES[p.grade].label+'〕 ✔'+p.correct+' ✘'+p.wrongN
+  let txt=p.name+'〔'+GRADES[p.grade].label+'〕 ✔'+p.correct+'/'+WIN_CORRECT+' ✘'+p.wrongN
     +' 🔥x'+p.streak+' ⚡x'+p.charges+' 🐾'+p.pets.length+'/'+MONSTERS.length+' 🪙'+p.coins;
   if(p.boostT>0)txt+=' ⚡加速'+Math.ceil(p.boostT/60)+'s';
   if(p.zapT>0)txt+=' ⚡被電!';
@@ -646,6 +697,7 @@ function viewportFor(p){
 function draw(){
   ctx.clearRect(0,0,W,H);
   [[p1,0],[p2,VH]].forEach(([p,vy])=>{
+    viewP=p;
     const {camx,camy}=viewportFor(p);
     ctx.save();ctx.beginPath();ctx.rect(0,vy,W,VH);ctx.clip();
     drawSky(vy,camx);
@@ -689,6 +741,7 @@ function resetGame(){
     p.boostT=0;p.stunT=0;p.invT=0;p.frozen=false;p.quiz=null;p.stunAfter=false;
     p.safeX=p.spawn;p.safeY=13*T-p.h;
     p.pets=[];p.petOrder=shuffle([...MONSTERS.keys()]);
+    p.usedQ=new Set();p.flagMsgT=0;
     panelOf(p).classList.add('hidden');
   }
   particles=[];texts=[];winner=null;state='play';
@@ -721,6 +774,26 @@ document.getElementById('btnAgain').onclick=()=>{
   document.getElementById('endScr').classList.add('hidden');
   resetGame();
 };
+//==================== 手機觸控 ====================
+function bindTouch(id,down,up){
+  const el=document.getElementById(id);
+  el.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();
+    try{el.setPointerCapture(e.pointerId);}catch(err){}
+    down();});
+  ['pointerup','pointercancel'].forEach(ev=>el.addEventListener(ev,e=>{e.preventDefault();if(up)up();}));
+  el.addEventListener('contextmenu',e=>e.preventDefault());
+}
+bindTouch('t1l',()=>keys.add('KeyA'),()=>keys.delete('KeyA'));
+bindTouch('t1r',()=>keys.add('KeyD'),()=>keys.delete('KeyD'));
+bindTouch('t1j',()=>{p1.jumpBuf=7;});
+bindTouch('t1z',()=>tryZap(p1));
+bindTouch('t2l',()=>keys.add('ArrowLeft'),()=>keys.delete('ArrowLeft'));
+bindTouch('t2r',()=>keys.add('ArrowRight'),()=>keys.delete('ArrowRight'));
+bindTouch('t2j',()=>{p2.jumpBuf=7;});
+bindTouch('t2z',()=>tryZap(p2));
+if(window.matchMedia&&matchMedia('(pointer:coarse)').matches)
+  document.getElementById('wrap').classList.add('touch');
+
 buildLevel();
 update();
 </script>
