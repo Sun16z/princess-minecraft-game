@@ -23,8 +23,9 @@
 
   function $(id){return document.getElementById(id);}
   function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
-  function lsGet(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
-  function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  function storageKey(k){try{return window.PMG_PROFILE_STORAGE_KEY?window.PMG_PROFILE_STORAGE_KEY(k):k;}catch(e){return k;}}
+  function lsGet(k,d){try{const v=JSON.parse(localStorage.getItem(storageKey(k)));return v==null?d:v;}catch(e){return d;}}
+  function lsSet(k,v){try{localStorage.setItem(storageKey(k),JSON.stringify(v));}catch(e){}}
   function playSfx(name){try{if(typeof sfx!=='undefined'&&sfx&&sfx[name])sfx[name]();}catch(e){}}
 
   function start(opts={}){

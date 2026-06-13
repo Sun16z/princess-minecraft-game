@@ -27,6 +27,14 @@ body{background:#1a1c2c;display:flex;flex-direction:column;align-items:center;ju
 .characterCard small{display:block;color:#e7f3ff;font-size:11px;line-height:1.35;}
 .characterCard.active{border-color:#9fe39f;background:rgba(86,178,101,.18);}
 .versionMinecraft .characterSel{display:none;}
+.profilePanel{max-width:760px;margin:8px auto 10px;padding:8px 10px;border:2px solid rgba(159,227,255,.34);background:rgba(255,255,255,.07);border-radius:6px;text-align:left;}
+.profileTitle{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#ffd84d;font-weight:bold;font-size:13px;margin-bottom:7px;}
+.profileTitle small{color:#9fe3ff;font-weight:normal;text-align:right;}
+.profileGrid{display:grid;grid-template-columns:1fr 1fr auto auto;gap:7px;align-items:end;}
+.profileField{display:flex;flex-direction:column;gap:3px;color:#dcecff;font-size:11px;font-weight:bold;}
+.profileField select{font-family:inherit;font-size:13px;font-weight:bold;color:#fff;background:#263445;border:2px solid #5c789a;border-radius:6px;padding:5px 6px;min-width:0;}
+.profileMiniBtn{font-family:inherit;font-size:12px;font-weight:bold;padding:6px 10px;border-radius:6px;border:2px solid #9fe39f;background:#1f4d2e;color:#9fe39f;cursor:pointer;}
+.profileMiniBtn.alt{border-color:#ffe58a;background:#4f3b20;color:#ffe58a;}
 .smooth3d{position:absolute;inset:0;z-index:6;overflow:hidden;background:#9fd8f0;}
 #smooth3dViewport{position:absolute;inset:0;}
 #smooth3dViewport canvas{width:100%!important;height:100%!important;display:block;image-rendering:auto;}
@@ -67,7 +75,7 @@ body{background:#1a1c2c;display:flex;flex-direction:column;align-items:center;ju
 .qbtn.bad{background:#9b2226;border-color:#ff8589;}
 .qbtn:disabled{cursor:default;}
 .qexp{margin-top:8px;font-size:14px;line-height:1.5;background:rgba(255,255,255,.1);padding:6px 10px;border-left:4px solid #e9a823;}
-.screen{position:absolute;inset:0;background:rgba(12,10,24,.92);display:flex;align-items:flex-start;justify-content:center;z-index:10;color:#fff;text-align:center;overflow-y:auto;padding:10px 0;}
+.screen{position:fixed;inset:0;background:rgba(12,10,24,.92);display:flex;align-items:flex-start;justify-content:center;z-index:10;color:#fff;text-align:center;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:10px 0 max(10px,env(safe-area-inset-bottom));}
 .panel{max-width:880px;width:96%;padding:10px 0 18px;margin:0 auto;}
 h1{font-size:28px;color:#ffd84d;text-shadow:3px 3px 0 #7a4a00;margin-bottom:4px;line-height:1.16;overflow-wrap:anywhere;}
 .sub{color:#9fe3ff;margin-bottom:10px;font-size:14px;}
@@ -125,6 +133,8 @@ body.minecraft-play .touch .tbtn{display:flex;}
 @media (max-width:760px){
   h1{font-size:18px;} .sub{font-size:12px;} .rules{font-size:11px;line-height:1.7;}
   .versionSel,.characterSel{grid-template-columns:1fr;gap:7px;margin-bottom:8px;}
+  .profileGrid{grid-template-columns:1fr 1fr;gap:6px;}
+  .profileMiniBtn{padding:6px 8px;}
   .versionCard{min-height:64px;padding:8px 10px;}
   .versionCard b{font-size:15px;} .versionCard small{font-size:11px;}
   .characterCard{min-height:52px;padding:7px 9px;}
@@ -146,9 +156,22 @@ body.minecraft-play .touch .tbtn{display:flex;}
   .panel{width:94%;padding:8px 0 12px;}
   #townScr .panel{height:calc(100% - 12px);}
   h1{font-size:16px;text-shadow:2px 2px 0 #7a4a00;}
-  .rules{max-height:138px;overflow:auto;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.12);padding:7px;border-radius:6px;}
-  .cols{gap:7px;margin-bottom:8px;}
-  .card{min-width:100%;line-height:1.55;}
+  .versionSel{grid-template-columns:1fr 1fr;gap:6px;}
+  .versionCard{min-height:50px;padding:7px 8px;}
+  .versionCard b{font-size:13px;margin-bottom:0;}
+  .versionCard small{display:none;}
+  .versionIcon{font-size:22px;}
+  .rules{max-height:74px;overflow:auto;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.12);padding:6px;border-radius:6px;}
+  .profilePanel{margin:7px auto;padding:7px;}
+  .profileTitle{align-items:flex-start;flex-direction:column;font-size:12px;}
+  .profileTitle small{text-align:left;}
+  .profileGrid{grid-template-columns:1fr 1fr;gap:5px;}
+  .profileMiniBtn{width:100%;}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+  .card{min-width:0;line-height:1.35;font-size:10px;padding:5px 6px;overflow-wrap:anywhere;}
+  .card b{font-size:12px;}
+  .gradeSel{gap:2px;margin-top:4px;}
+  .gbtn{font-size:11px;padding:2px 7px;}
   .smoothChip{font-size:12px;max-width:calc(100% - 72px);padding:6px 8px;}
   .smoothChip.secondary{top:46px;font-size:11px;max-width:calc(100% - 24px);}
   .smoothIconBtn{width:40px;height:40px;font-size:21px;}
@@ -218,6 +241,19 @@ body.minecraft-play .touch .tbtn{display:flex;}
   <div id="startScr" class="screen versionMinecraft"><div class="panel">
     <h1>⛏️ 麥塊公主大冒險 × 怪獸訓練家 👑</h1>
     <div class="sub">每局隨機世界 ─ 草原🌿・雪地❄️・下界🔥・星空🌌</div>
+    <div class="profilePanel" aria-label="本機小孩檔案">
+      <div class="profileTitle">👧 本機小孩檔案 <small id="profileHint">進度只存在這台裝置的瀏覽器</small></div>
+      <div class="profileGrid">
+        <label class="profileField">玩家一檔案
+          <select id="profileSel1" aria-label="玩家一檔案"></select>
+        </label>
+        <label class="profileField">玩家二檔案
+          <select id="profileSel2" aria-label="玩家二檔案"></select>
+        </label>
+        <button class="profileMiniBtn" id="btnProfileAdd">＋ 新增</button>
+        <button class="profileMiniBtn alt" id="btnProfileRename">✎ 改名</button>
+      </div>
+    </div>
     <div class="versionSel" id="versionSel" aria-label="版本選擇">
       <button class="versionCard active" data-version="minecraft">
         <span class="versionIcon">⛏️</span>
@@ -246,13 +282,13 @@ body.minecraft-play .touch .tbtn{display:flex;}
       <button class="gbtn" id="btnTown" style="margin-left:12px;background:#1f4d2e;color:#9fe39f;border-color:#3f8d52">🏘️ 我的小鎮</button>
     </div>
     <div class="cols">
-      <div class="card p1c"><b>🌟 玩家一：羅潔塔姐姐</b><br>
+      <div class="card p1c"><b>🌟 玩家一：<span id="p1CardName">羅潔塔</span></b><br>
         移動 <kbd>A</kbd><kbd>D</kbd>　跳躍 <kbd>W</kbd>（連按兩下＝二段跳）　🎁道具 <kbd>S</kbd><br>
         答題 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd>
         <div class="gradeSel">題目年級：
           <button class="gbtn" data-p="1" data-g="grade2">二下</button><button class="gbtn" data-p="1" data-g="grade3">三上</button><button class="gbtn active" data-p="1" data-g="grade5">五下</button><button class="gbtn" data-p="1" data-g="grade6">六上</button>
         </div></div>
-      <div class="card p2c"><b>💫 玩家二：羅潔塔妹妹</b><br>
+      <div class="card p2c"><b>💫 玩家二：<span id="p2CardName">小客人</span></b><br>
         移動 <kbd>←</kbd><kbd>→</kbd>　跳躍 <kbd>↑</kbd>（連按兩下＝二段跳）　🎁道具 <kbd>↓</kbd><br>
         答題 <kbd>7</kbd><kbd>8</kbd><kbd>9</kbd><kbd>0</kbd>
         <div class="gradeSel">題目年級：
@@ -314,9 +350,82 @@ let state='start', winner=null, frame=0, gameFrames=0, gameMode='vs', coopWin=fa
 let viewP=null, townOpen=false, countT=0;
 
 //==================== 存檔工具 ====================
-function lsGet(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
-function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function rawLsGet(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
+function rawLsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+
+//==================== 本機小孩檔案 ====================
+const PROFILE_STORE_KEY='pmgProfilesV1';
+const PROFILE_PREFIX='pmgProfileV1:';
+const PROFILE_GRADE_KEYS=['grade2','grade3','grade5','grade6'];
+function makeProfileId(){return 'kid_'+Date.now().toString(36)+'_'+Math.floor(Math.random()*10000).toString(36);}
+function cleanProfileName(name){return String(name||'').replace(/[<>]/g,'').trim().slice(0,12);}
+function defaultProfileStore(){
+  return {
+    migrated:false,
+    slot1:'kid_rosetta',
+    slot2:'kid_guest',
+    profiles:[
+      {id:'kid_rosetta',name:'羅潔塔',icon:'👑',grade:'grade5'},
+      {id:'kid_guest',name:'小客人',icon:'⭐',grade:'grade2'}
+    ]
+  };
+}
+function normalizeProfileStore(raw){
+  const base=defaultProfileStore();
+  const store=raw&&Array.isArray(raw.profiles)?raw:base;
+  const profiles=store.profiles.map((p,i)=>({
+    id:String(p.id||makeProfileId()),
+    name:cleanProfileName(p.name)||('小玩家'+(i+1)),
+    icon:String(p.icon||['👑','⭐','🌸','🚀'][i%4]),
+    grade:PROFILE_GRADE_KEYS.includes(p.grade)?p.grade:(i===0?'grade5':'grade2')
+  }));
+  if(!profiles.length)profiles.push(...base.profiles);
+  const ids=new Set(profiles.map(p=>p.id));
+  return {
+    migrated:!!store.migrated,
+    slot1:ids.has(store.slot1)?store.slot1:profiles[0].id,
+    slot2:ids.has(store.slot2)?store.slot2:(profiles[1]?.id||profiles[0].id),
+    profiles
+  };
+}
+function profileStorageKey(id,k){return PROFILE_PREFIX+id+':'+k;}
+function profileGet(id,k,d){return rawLsGet(profileStorageKey(id,k),d);}
+function profileSet(id,k,v){rawLsSet(profileStorageKey(id,k),v);}
+function profileName(id){return (profileStore?.profiles||[]).find(p=>p.id===id)?.name||'小玩家';}
+function profileById(id){return (profileStore?.profiles||[]).find(p=>p.id===id)||profileStore.profiles[0];}
+function migrateLegacyProgress(profileId){
+  ['pmgTown','pmgTownLife','pmgSmooth3d'].forEach(k=>{
+    if(localStorage.getItem(profileStorageKey(profileId,k))==null&&localStorage.getItem(k)!=null)profileSet(profileId,k,rawLsGet(k,null));
+  });
+  PROFILE_GRADE_KEYS.forEach(g=>{
+    ['pmgWrong_'+g,'pmgLvl_'+g].forEach(k=>{
+      if(localStorage.getItem(profileStorageKey(profileId,k))==null&&localStorage.getItem(k)!=null)profileSet(profileId,k,rawLsGet(k,null));
+    });
+  });
+  const legacyDex=[...new Set([...(rawLsGet('pmgDex1',[])||[]),...(rawLsGet('pmgDex2',[])||[])])];
+  if(legacyDex.length&&localStorage.getItem(profileStorageKey(profileId,'pmgDex'))==null)profileSet(profileId,'pmgDex',legacyDex);
+}
+let profileStore=normalizeProfileStore(rawLsGet(PROFILE_STORE_KEY,null));
+if(!profileStore.migrated){migrateLegacyProgress(profileStore.slot1);profileStore.migrated=true;rawLsSet(PROFILE_STORE_KEY,profileStore);}
+let selectedProfileIds={1:profileStore.slot1,2:profileStore.slot2};
+let activeStorageProfileId=selectedProfileIds[1];
+const PROFILE_ICONS=['👑','⭐','🌸','🎮','🧁','🌿','🦋','☕','🏹','🎨'];
+function saveProfileStore(){
+  profileStore.slot1=selectedProfileIds[1];
+  profileStore.slot2=selectedProfileIds[2];
+  rawLsSet(PROFILE_STORE_KEY,profileStore);
+}
+function shouldScopeKey(k){return /^(pmgWrong_|pmgLvl_|pmgDex$|pmgTown$|pmgTownLife$|pmgSmooth3d$)/.test(k);}
+function scopedKey(k,id=activeStorageProfileId){return shouldScopeKey(k)?profileStorageKey(id,k):k;}
+function lsGet(k,d){return rawLsGet(scopedKey(k),d);}
+function lsSet(k,v){rawLsSet(scopedKey(k),v);}
+function withProfile(id,fn){const prev=activeStorageProfileId;activeStorageProfileId=id;try{return fn();}finally{activeStorageProfileId=prev;}}
+function rememberSelections(){
+  rawLsSet('pmgSel',{g1:chosenGrade[1],g2:chosenGrade[2],mode:gameMode,version:activeVersion,
+    character:smoothCharacter,p1Profile:selectedProfileIds[1],p2Profile:selectedProfileIds[2]});
+}
+window.PMG_PROFILE_STORAGE_KEY=(k)=>scopedKey(k,activeStorageProfileId);
 
 //==================== 主題世界 ====================
 const THEMES=[
@@ -403,10 +512,70 @@ const p2=makePlayer('羅潔塔妹妹',{spawn:120, dress:'#5b8de8',dress2:'#3a64c
 const players=[p1,p2];
 function otherOf(p){return p===p1?p2:p1;}
 const chosenGrade={1:'grade5',2:'grade2'};   // 姐姐五下、妹妹二下
+function setGradeForSlot(pn,grade){
+  if(!PROFILE_GRADE_KEYS.includes(grade))return;
+  chosenGrade[pn]=grade;
+  const prof=profileById(selectedProfileIds[pn]);
+  if(prof){prof.grade=grade;saveProfileStore();}
+  document.querySelectorAll('.gbtn[data-p="'+pn+'"]').forEach(x=>x.classList.toggle('active',x.dataset.g===grade));
+}
+function syncSlotFromProfile(pn){
+  const prof=profileById(selectedProfileIds[pn]);
+  chosenGrade[pn]=prof.grade||chosenGrade[pn]||'grade2';
+  document.getElementById(pn==='1'?'p1CardName':'p2CardName').textContent=prof.name;
+  document.querySelectorAll('.gbtn[data-p="'+pn+'"]').forEach(x=>x.classList.toggle('active',x.dataset.g===chosenGrade[pn]));
+}
+function renderProfileSelects(){
+  [1,2].forEach(pn=>{
+    const sel=document.getElementById('profileSel'+pn);
+    if(!sel)return;
+    sel.innerHTML='';
+    profileStore.profiles.forEach(p=>{
+      const opt=document.createElement('option');
+      opt.value=p.id;opt.textContent=p.icon+' '+p.name+'（'+(GRADES[p.grade]?.label||'未選')+'）';
+      sel.appendChild(opt);
+    });
+    sel.value=selectedProfileIds[pn];
+  });
+  syncSlotFromProfile('1');syncSlotFromProfile('2');
+  const same=selectedProfileIds[1]===selectedProfileIds[2];
+  document.getElementById('profileHint').textContent=same?'玩家一、二目前使用同一個檔案':'進度只存在這台裝置的瀏覽器';
+}
+function selectProfileForSlot(pn,id){
+  if(!profileStore.profiles.some(p=>p.id===id))return;
+  selectedProfileIds[pn]=id;
+  if(String(pn)==='1'){
+    activeStorageProfileId=id;
+    if(typeof reloadTownState==='function')reloadTownState();
+  }
+  saveProfileStore();renderProfileSelects();
+}
+function addLocalProfile(){
+  const raw=prompt('請輸入小孩名字（只存在這台裝置）','');
+  const name=cleanProfileName(raw);
+  if(!name)return;
+  const prof={id:makeProfileId(),name,icon:PROFILE_ICONS[profileStore.profiles.length%PROFILE_ICONS.length],
+    grade:chosenGrade[1]||'grade2'};
+  profileStore.profiles.push(prof);
+  const target=selectedProfileIds[1]===selectedProfileIds[2]?2:1;
+  selectedProfileIds[target]=prof.id;
+  if(target===1){activeStorageProfileId=prof.id;if(typeof reloadTownState==='function')reloadTownState();}
+  saveProfileStore();renderProfileSelects();
+}
+function renameActiveProfile(){
+  const prof=profileById(selectedProfileIds[1]);
+  const name=cleanProfileName(prompt('修改玩家一檔案名稱',prof.name));
+  if(!name)return;
+  prof.name=name;
+  saveProfileStore();renderProfileSelects();
+}
 document.querySelectorAll('.gbtn[data-g]').forEach(b=>{
-  b.onclick=()=>{const pn=b.dataset.p;chosenGrade[pn]=b.dataset.g;
-    document.querySelectorAll('.gbtn[data-p="'+pn+'"]').forEach(x=>x.classList.toggle('active',x===b));};
+  b.onclick=()=>setGradeForSlot(b.dataset.p,b.dataset.g);
 });
+document.getElementById('profileSel1').onchange=e=>selectProfileForSlot(1,e.target.value);
+document.getElementById('profileSel2').onchange=e=>selectProfileForSlot(2,e.target.value);
+document.getElementById('btnProfileAdd').onclick=addLocalProfile;
+document.getElementById('btnProfileRename').onclick=renameActiveProfile;
 document.querySelectorAll('.mbtn').forEach(b=>{
   b.onclick=()=>{gameMode=b.dataset.m;
     document.querySelectorAll('.mbtn').forEach(x=>x.classList.toggle('active',x===b));};
@@ -478,20 +647,21 @@ function isBehind(p){return gameMode==='vs' && otherOf(p).x-p.x>900;}   // 落�
 
 //==================== 錯題庫（跨局記憶）====================
 function wrongKey(g){return 'pmgWrong_'+g;}
-function loadWrong(g){return lsGet(wrongKey(g),[]);}
-function saveWrongBank(g,bank){lsSet(wrongKey(g),bank.slice(-40));}
-function addWrong(grade,q){
-  const bank=loadWrong(grade);
+function playerProfileId(p){return p?.profileId||selectedProfileIds[p?.idx||1]||selectedProfileIds[1];}
+function loadWrong(g,profileId=activeStorageProfileId){return profileGet(profileId,wrongKey(g),[]);}
+function saveWrongBank(g,bank,profileId=activeStorageProfileId){profileSet(profileId,wrongKey(g),bank.slice(-40));}
+function addWrong(profileId,grade,q){
+  const bank=loadWrong(grade,profileId);
   if(!bank.some(e=>e.q.prompt===q.prompt)){bank.push({q:{subject:q.subject,label:q.label,domain:q.domain,
     prompt:q.prompt,choices:q.choices,answer:q.answer,explanation:q.explanation,tip:q.tip,
-    speechPrompt:q.speechPrompt,practiceText:q.practiceText},need:2});saveWrongBank(grade,bank);}
+    speechPrompt:q.speechPrompt,practiceText:q.practiceText},need:2});saveWrongBank(grade,bank,profileId);}
 }
-function reviewResult(grade,prompt,ok){
-  const bank=loadWrong(grade);
+function reviewResult(profileId,grade,prompt,ok){
+  const bank=loadWrong(grade,profileId);
   const e=bank.find(en=>en.q.prompt===prompt); if(!e)return;
   if(ok){e.need--; if(e.need<=0)bank.splice(bank.indexOf(e),1);}
   else e.need=2;
-  saveWrongBank(grade,bank);
+  saveWrongBank(grade,bank,profileId);
 }
 
 //==================== 五下進階數學 ====================
@@ -576,7 +746,7 @@ function panelOf(p){return document.getElementById(p===p1?'quizP1':'quizP2');}
 function openQuiz(p,gold){
   if(p.quiz)return;
   let q,review=false;
-  const bank=loadWrong(p.grade);
+  const bank=loadWrong(p.grade,playerProfileId(p));
   if(!gold&&bank.length&&Math.random()<.3){
     const e=bank[irnd(bank.length)];
     q=Object.assign({},e.q,{choices:shuffle(e.q.choices)});   // 重洗選項順序，避免背位置
@@ -639,12 +809,12 @@ function answerQuiz(p,idx){
     else if(i===idx)b.classList.add('bad');});
   const exp=panelOf(p).querySelector('.qexp');
   p.answeredCount++;
-  if(p.quiz.review)reviewResult(p.grade,q.prompt,ok);
+  if(p.quiz.review)reviewResult(playerProfileId(p),p.grade,q.prompt,ok);
   // 動態難度（只看數學）
   if(q.subject==='math'){
     if(ok){p.mcorr++;p.mwrong=0;if(p.mcorr>=2){p.dLvl=Math.min(5,p.dLvl+1);p.mcorr=0;}}
     else{p.mwrong++;p.mcorr=0;if(p.mwrong>=2){p.dLvl=Math.max(1,p.dLvl-1);p.mwrong=0;}}
-    lsSet('pmgLvl_'+p.grade,p.dLvl);
+    profileSet(playerProfileId(p),'pmgLvl_'+p.grade,p.dLvl);
   }
   if(ok){
     const gain=gold?2:1;
@@ -661,7 +831,7 @@ function answerQuiz(p,idx){
   }else{
     p.wrongN++;p.streak=0;sfx.wrong();
     p.stunAfter=(gold?240:120)*(hasPetIdx(p,4)?.5:1);
-    if(!p.quiz.review)addWrong(p.grade,q);
+    if(!p.quiz.review)addWrong(playerProfileId(p),p.grade,q);
     p.wrongList.push({prompt:q.prompt,chosen:idx>=0?q.choices[idx]:'（超時沒作答）',answer:q.answer});
     exp.innerHTML='❌ 正確答案是「<b>'+q.answer+'</b>」。　'+(q.explanation||'');
   }
@@ -682,8 +852,8 @@ function capturePet(p){
   sfx.capture();
   spawnParts(p.x+12,p.y+10,m.colorC,18,5);
   toast(p.x+12,p.y-30,'收服 '+m.name+'！'+PERKS[mi],'#9fe3ff');
-  const dexKey='pmgDex'+p.idx;
-  lsSet(dexKey,[...new Set([...lsGet(dexKey,[]),mi])]);
+  const dexKey='pmgDex', profileId=playerProfileId(p);
+  profileSet(profileId,dexKey,[...new Set([...(profileGet(profileId,dexKey,[])||[]),mi])]);
   if(p.pets.length===MONSTERS.length){p.coins+=10;sfx.dexdone();
     toast(p.x+12,p.y-52,'🎉 圖鑑收集完成 🪙+10！','#ffd84d');}
 }
@@ -1228,15 +1398,24 @@ const TOWN_INTERIORS={
   {id:'petMat',n:'寵物陪伴墊',kind:'petBed',x:740,y:330,r:68,actions:['pet','napPet']}
  ]}
 };
-let townData=lsGet('pmgTown',{coins:0,owned:[]});
-townData.owned=[...new Set(townData.owned||[])];
-let townLife=Object.assign({food:6,mood:50,clean:55,energy:60,last:'歡迎回到公主小鎮'},lsGet('pmgTownLife',{}));
 function townNumber(v,fallback){v=Number(v);return Number.isFinite(v)?v:fallback;}
-townLife.food=Math.max(0,Math.round(townNumber(townLife.food,6)));
-townLife.mood=clamp(townNumber(townLife.mood,50),0,100);
-townLife.clean=clamp(townNumber(townLife.clean,55),0,100);
-townLife.energy=clamp(townNumber(townLife.energy,60),0,100);
-townLife.last=String(townLife.last||'歡迎回到公主小鎮');
+function normalizeTownData(raw){
+  const data=Object.assign({coins:0,owned:[]},raw||{});
+  data.coins=Math.max(0,Math.floor(townNumber(data.coins,0)));
+  data.owned=[...new Set(data.owned||[])];
+  return data;
+}
+function normalizeTownLife(raw){
+  const life=Object.assign({food:6,mood:50,clean:55,energy:60,last:'歡迎回到公主小鎮'},raw||{});
+  life.food=Math.max(0,Math.round(townNumber(life.food,6)));
+  life.mood=clamp(townNumber(life.mood,50),0,100);
+  life.clean=clamp(townNumber(life.clean,55),0,100);
+  life.energy=clamp(townNumber(life.energy,60),0,100);
+  life.last=String(life.last||'歡迎回到公主小鎮');
+  return life;
+}
+let townData=normalizeTownData(lsGet('pmgTown',{coins:0,owned:[]}));
+let townLife=normalizeTownLife(lsGet('pmgTownLife',{}));
 const tcv=document.getElementById('townCv'), tctx=tcv.getContext('2d');
 const townTouchKeys=new Set();
 let townInterior=null,townActionSig='',townHudSig='',townNearby=null;
@@ -1244,6 +1423,12 @@ const townCam={x:0,y:0};
 const townPlayer={x:520,y:500,vx:0,vy:0,dir:1,walk:0,pose:'stand',poseT:0,actT:0,actText:''};
 let townPets=[];
 function saveTown(){lsSet('pmgTown',townData);lsSet('pmgTownLife',townLife);}
+function reloadTownState(){
+  townData=normalizeTownData(lsGet('pmgTown',{coins:0,owned:[]}));
+  townLife=normalizeTownLife(lsGet('pmgTownLife',{}));
+  townActionSig='';townHudSig='';townNearby=null;ensureTownPets();
+  if(document.getElementById('shopBar'))renderShop();
+}
 function townHas(id){return townData.owned.includes(id);}
 function townBuildingUnlocked(b){return b.public||townHas(b.id);}
 function renderShop(){
@@ -1270,7 +1455,7 @@ function renderShop(){
   updateTownHud();
 }
 function townPetIds(){
-  const ids=[...new Set([...lsGet('pmgDex1',[]),...lsGet('pmgDex2',[])])];
+  const ids=[...new Set(lsGet('pmgDex',[])||[])];
   return ids.length?ids.slice(0,5):[0];
 }
 function ensureTownPets(){
@@ -1580,17 +1765,20 @@ function update(){
 //==================== 開始／結束 ====================
 function resetGame(){
   document.body.classList.add('minecraft-play');
+  activeStorageProfileId=selectedProfileIds[1];
   buildLevel();
   THEME=THEMES[irnd(THEMES.length)];
   buildTileCache();
-  p1.grade=chosenGrade[1];p2.grade=chosenGrade[2];
   for(const p of players){
+    p.profileId=selectedProfileIds[p.idx]||selectedProfileIds[1];
+    p.name=profileName(p.profileId);
+    p.grade=chosenGrade[p.idx]||profileById(p.profileId).grade||'grade2';
     p.x=p.spawn;p.y=11*T;p.vx=0;p.vy=0;p.coins=0;p.correct=0;p.wrongN=0;
     p.streak=0;p.bestStreak=0;p.answeredCount=0;p.zapT=0;p.item=null;p.shield=false;p.magnetT=0;
     p.boostT=0;p.boostPow=5.2;p.stunT=0;p.invT=0;p.frozen=false;p.quiz=null;p.stunAfter=0;
     p.safeX=p.spawn;p.safeY=13*T-p.h;p.shakeT=0;p.alertT=0;p.atFlag=false;p.wrongList=[];
     p.jumpsLeft=2;p.coyote=0;p.mcorr=0;p.mwrong=0;p.recentQ=[];
-    p.dLvl=lsGet('pmgLvl_'+p.grade,1);
+    p.dLvl=profileGet(p.profileId,'pmgLvl_'+p.grade,1);
     p.pets=[];p.petOrder=shuffle([...MONSTERS.keys()]);
     p.usedQ=new Set();p.flagMsgT=0;
     panelOf(p).classList.add('hidden');
@@ -1598,18 +1786,47 @@ function resetGame(){
   particles=[];texts=[];bananas=[];winner=null;coopWin=false;gameFrames=0;
   bgmStep=0;stopBGM();
   state='count';countT=185;   // 3-2-1-GO 倒數開場
-  lsSet('pmgSel',{g1:chosenGrade[1],g2:chosenGrade[2],mode:gameMode,version:activeVersion,character:smoothCharacter});
+  rememberSelections();
+}
+function addTownCoinsForProfile(profileId,amount){
+  const prof=profileById(profileId);
+  const coins=Math.max(0,Math.floor(amount||0));
+  const data=normalizeTownData(profileGet(prof.id,'pmgTown',{coins:0,owned:[]}));
+  data.coins+=coins;
+  profileSet(prof.id,'pmgTown',data);
+  return {id:prof.id,amount:coins,coins:data.coins};
+}
+function rewardTownForPlayers(){
+  const byProfile={};
+  for(const p of players){
+    const id=playerProfileId(p);
+    byProfile[id]=(byProfile[id]||0)+p.coins+p.correct;
+  }
+  const rows=Object.keys(byProfile).map(id=>addTownCoinsForProfile(id,byProfile[id]));
+  activeStorageProfileId=selectedProfileIds[1];
+  reloadTownState();
+  return rows;
+}
+function townRewardText(rows){
+  if(rows.length===1){
+    const r=rows[0];
+    return '🏘️ '+profileName(r.id)+' 小鎮基金 +'+r.amount+' 🪙（目前共 '+r.coins+' 🪙）';
+  }
+  return '🏘️ 小鎮基金已分別存入：'+rows.map(r=>profileName(r.id)+' +'+r.amount+' 🪙（共 '+r.coins+'）').join('、');
+}
+function coopBestKey(){
+  return 'pmgCoopBest:'+[selectedProfileIds[1],selectedProfileIds[2]].sort().join(':');
 }
 function showEnd(){
   document.body.classList.remove('minecraft-play');
-  const earned=p1.coins+p2.coins+p1.correct+p2.correct;
-  townData.coins+=earned;lsSet('pmgTown',townData);
+  const rewardRows=rewardTownForPlayers();
   if(gameMode==='coop'&&coopWin){
     document.getElementById('endTitle').textContent='🎉 成功救出小公主！';
     const sec=Math.round(gameFrames/60);
-    const best=lsGet('pmgCoopBest',null);
+    const bestKey=coopBestKey();
+    const best=rawLsGet(bestKey,null);
     let bestTxt='';
-    if(best==null||sec<best){lsSet('pmgCoopBest',sec);bestTxt='　🏅新紀錄！';}
+    if(best==null||sec<best){rawLsSet(bestKey,sec);bestTxt='　🏅新紀錄！';}
     else bestTxt='　（最佳紀錄 '+best+' 秒）';
     document.getElementById('endSub').textContent='兩位公主合力過關，用時 '+sec+' 秒'+bestTxt;
   }else{
@@ -1633,10 +1850,13 @@ function showEnd(){
     d.innerHTML=html;
     stats.appendChild(d);
   }
-  document.getElementById('endTown').textContent='🏘️ 小鎮基金 +'+earned+' 🪙（目前共 '+townData.coins+' 🪙）';
+  document.getElementById('endTown').textContent=townRewardText(rewardRows);
   document.getElementById('endScr').classList.remove('hidden');
 }
 function startSmoothVersion(){
+  activeStorageProfileId=selectedProfileIds[1];
+  reloadTownState();
+  rememberSelections();
   stopBGM();keys.clear();state='smooth';
   document.body.classList.remove('minecraft-play');
   for(const p of players){panelOf(p).classList.add('hidden');p.quiz=null;p.frozen=false;}
@@ -1647,8 +1867,8 @@ function startSmoothVersion(){
       character:smoothCharacter,
       onExit:exitSmoothVersion,
       onReward:(coins)=>{
-        townData.coins+=coins;
-        lsSet('pmgTown',townData);
+        const r=addTownCoinsForProfile(selectedProfileIds[1],coins);
+        townData=normalizeTownData(profileGet(selectedProfileIds[1],'pmgTown',{coins:r.coins,owned:[]}));
       }
     });
   }else{
@@ -1667,7 +1887,7 @@ document.getElementById('btnSmoothBack').onclick=exitSmoothVersion;
 document.getElementById('btnStart').onclick=()=>{
   initAudio();
   document.getElementById('startScr').classList.add('hidden');
-  lsSet('pmgSel',{g1:chosenGrade[1],g2:chosenGrade[2],mode:gameMode,version:activeVersion,character:smoothCharacter});
+  rememberSelections();
   if(activeVersion==='smooth')startSmoothVersion();
   else resetGame();
 };
@@ -1676,7 +1896,9 @@ document.getElementById('btnAgain').onclick=()=>{
   resetGame();
 };
 function openTown(){
-  initAudio();stopBGM();keys.clear();townTouchKeys.clear();ensureTownPets();renderShop();updateTownHud();
+  initAudio();stopBGM();keys.clear();townTouchKeys.clear();
+  activeStorageProfileId=selectedProfileIds[1];
+  reloadTownState();updateTownHud();
   townActionSig='';townOpen=true;document.getElementById('townScr').classList.remove('hidden');
 }
 document.getElementById('btnTown').onclick=openTown;
@@ -1717,16 +1939,17 @@ if(window.matchMedia&&matchMedia('(pointer:coarse)').matches)
 
 // 記住上次的模式與年級選擇
 (function(){
-  const sel=lsGet('pmgSel',null);
+  const sel=rawLsGet('pmgSel',null);
   if(sel){
-    chosenGrade[1]=sel.g1||chosenGrade[1]; chosenGrade[2]=sel.g2||chosenGrade[2];
+    if(profileStore.profiles.some(p=>p.id===sel.p1Profile))selectedProfileIds[1]=sel.p1Profile;
+    if(profileStore.profiles.some(p=>p.id===sel.p2Profile))selectedProfileIds[2]=sel.p2Profile;
+    activeStorageProfileId=selectedProfileIds[1];
     gameMode=sel.mode||gameMode; activeVersion=sel.version||activeVersion; smoothCharacter=sel.character||smoothCharacter;
   }
   const params=new URLSearchParams(location.search);
   if(['minecraft','smooth'].includes(params.get('version')))activeVersion=params.get('version');
   if(['storybook','forest'].includes(params.get('character')))smoothCharacter=params.get('character');
-  document.querySelectorAll('.gbtn[data-g]').forEach(b=>
-    b.classList.toggle('active',chosenGrade[b.dataset.p]===b.dataset.g));
+  syncSlotFromProfile('1');syncSlotFromProfile('2');renderProfileSelects();
   document.querySelectorAll('.mbtn').forEach(b=>
     b.classList.toggle('active',b.dataset.m===gameMode));
   document.querySelectorAll('.versionCard').forEach(b=>
