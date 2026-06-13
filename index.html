@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>麥塊公主大冒險 × 怪獸訓練家｜雙人知識對戰</title>
+<meta name="theme-color" content="#1a1c2c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E👑%3C/text%3E%3C/svg%3E">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#1a1c2c;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:"Microsoft JhengHei","PingFang TC",sans-serif;}
@@ -79,6 +83,7 @@ kbd{background:#333;border:1px solid #777;border-bottom:3px solid #777;padding:1
 <div id="wrap">
   <canvas id="game" width="960" height="540"></canvas>
   <button class="muteBtn" id="btnMute">🎵 音樂開</button>
+  <button class="muteBtn" id="btnPause" style="right:104px">⏸ 暫停</button>
   <div class="tbtn" id="t1l">◀</div><div class="tbtn" id="t1r">▶</div>
   <div class="tbtn" id="t1j">🆙</div><div class="tbtn" id="t1z">🎁</div>
   <div class="tbtn" id="t2l">◀</div><div class="tbtn" id="t2r">▶</div>
@@ -158,7 +163,7 @@ const WIN_CORRECT=15;
 const cv=document.getElementById('game'), ctx=cv.getContext('2d');
 let grid=[], enemies=[], particles=[], texts=[], bananas=[], flagX=COLS-10;
 let state='start', winner=null, frame=0, gameFrames=0, gameMode='vs', coopWin=false;
-let viewP=null, townOpen=false;
+let viewP=null, townOpen=false, countT=0;
 
 //==================== 存檔工具 ====================
 function lsGet(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
@@ -240,7 +245,7 @@ function makePlayer(name,cfg){
     boostT:0,boostPow:5.2,stunT:0,invT:0,frozen:false,quiz:null,jumpBuf:0,jumpsLeft:2,coyote:0,
     safeX:64,safeY:372,stunAfter:0,grade:'grade2',pets:[],petOrder:[],
     usedQ:new Set(),flagMsgT:0,item:null,shield:false,magnetT:0,
-    shakeT:0,alertT:0,atFlag:false,wrongList:[],dLvl:1,mcorr:0,mwrong:0},cfg);
+    shakeT:0,alertT:0,atFlag:false,wrongList:[],dLvl:1,mcorr:0,mwrong:0,recentQ:[]},cfg);
 }
 const p1=makePlayer('羅潔塔姐姐',{spawn:64, dress:'#5bc8e8',dress2:'#3a9fc0',hair:'#f5e6a8',
   keys:{l:'KeyA',r:'KeyD',j:'KeyW',atk:'KeyS'},ansKeys:['1','2','3','4'],hud:'#9fe0ff',idx:1});
@@ -411,17 +416,24 @@ function openQuiz(p,gold){
   let q,review=false;
   const bank=loadWrong(p.grade);
   if(!gold&&bank.length&&Math.random()<.3){
-    q=bank[irnd(bank.length)].q; review=true;
-  }else if(gold){
-    q=p.grade==='grade5'?hardG5Math()
-      :generateQuestion({mode:'math',grade:'grade2',level:1,wave:p.answeredCount+1,
-        streak:p.streak,answeredCount:p.answeredCount,difficulty:'ace'});
+    const e=bank[irnd(bank.length)];
+    q=Object.assign({},e.q,{choices:shuffle(e.q.choices)});   // 重洗選項順序，避免背位置
+    review=true;
   }else{
-    const mode=SUBJECT_CYCLE[p.answeredCount%SUBJECT_CYCLE.length];
-    if(mode==='math'&&p.grade==='grade5'&&Math.random()<.25+.12*p.dLvl) q=hardG5Math();
-    else q=generateQuestion({mode,grade:p.grade,level:1,wave:p.answeredCount+1,
-      streak:p.streak,answeredCount:p.answeredCount,difficulty:diffOf(p.dLvl)});
+    const gen=()=>{
+      if(gold)return p.grade==='grade5'?hardG5Math()
+        :generateQuestion({mode:'math',grade:'grade2',level:1,wave:p.answeredCount+1,
+          streak:p.streak,answeredCount:p.answeredCount,difficulty:'ace'});
+      const mode=SUBJECT_CYCLE[p.answeredCount%SUBJECT_CYCLE.length];
+      if(mode==='math'&&p.grade==='grade5'&&Math.random()<.25+.12*p.dLvl)return hardG5Math();
+      return generateQuestion({mode,grade:p.grade,level:1,wave:p.answeredCount+1,
+        streak:p.streak,answeredCount:p.answeredCount,difficulty:diffOf(p.dLvl)});
+    };
+    q=gen();
+    let tries=0;   // 同一局避免出重複題
+    while(p.recentQ.includes(q.prompt)&&tries<4){q=gen();tries++;}
   }
+  p.recentQ.push(q.prompt); if(p.recentQ.length>10)p.recentQ.shift();
   const timer=(25+(gold?5:0)+(hasPetIdx(p,1)?5:0))*60;
   p.quiz={q,timer,done:false,gold:!!gold,review};
   p.frozen=true;
@@ -446,6 +458,7 @@ function openQuiz(p,gold){
   });
   pn.classList.remove('hidden');
   sfx.block();
+  if(gold)tone(1047,.15,'triangle',.12,.08);   // 挑戰題專屬音
 }
 function grantItem(p){
   if(p.item){p.coins+=3;toast(p.x+12,p.y-34,'道具滿了 🪙+3','#ffe14d');return;}
@@ -481,7 +494,7 @@ function answerQuiz(p,idx){
     sfx.correct();spawnParts(p.x+12,p.y,'#ffd84d',16,5);
     exp.innerHTML='✅ <b>答對了！</b>'+(gold?'（⭐挑戰題算 2 題＋4🪙）':'')+'　'+(q.explanation||'');
     if(gameMode==='vs')otherOf(p).alertT=25;   // 對手畫面閃光示警
-    if(Math.floor(p.correct/2)>p.pets.length&&p.pets.length<MONSTERS.length)capturePet(p);
+    while(Math.floor(p.correct/2)>p.pets.length&&p.pets.length<MONSTERS.length)capturePet(p);
     if(p.streak%3===0)grantItem(p);
   }else{
     p.wrongN++;p.streak=0;sfx.wrong();
@@ -548,6 +561,7 @@ window.addEventListener('keydown',e=>{
     if(p.quiz&&!p.quiz.done){const i=p.ansKeys.indexOf(e.key);if(i>=0){answerQuiz(p,i);return;}}
   }
   if(e.code==='KeyM'&&!e.repeat){initAudio();setBgm(!bgmOn);return;}
+  if(e.code==='KeyP'&&!e.repeat){togglePause();return;}
   if(!e.repeat)for(const p of players){
     if(e.code===p.keys.j)p.jumpBuf=7;
     if(e.code===p.keys.atk)useItem(p);
@@ -658,7 +672,23 @@ function updatePlayer(p){
     }
   }
 }
-function endGame(p){state='end';winner=p;stopBGM();sfx.win();setTimeout(showEnd,800);}
+function endGame(p){state='end';winner=p;stopBGM();sfx.win();
+  // 勝利煙火
+  for(let i=0;i<5;i++)setTimeout(()=>{
+    spawnParts(p.x+12+(Math.random()-.5)*160,p.y-20-Math.random()*80,
+      ['#ffd84d','#ff6f9e','#7df0ff','#9fe39f'][i%4],26,7);
+    tone(700+i*120,.12,'triangle',.1);
+  },i*180);
+  setTimeout(showEnd,1200);}
+function togglePause(){
+  if(state==='play'){state='pause';stopBGM();}
+  else if(state==='pause'){state='play';if(bgmOn)startBGM();}
+}
+document.getElementById('btnPause').onclick=()=>{initAudio();togglePause();};
+document.addEventListener('visibilitychange',()=>{   // 切到別的分頁停音樂
+  if(document.hidden)stopBGM();
+  else if(state==='play'&&bgmOn)startBGM();
+});
 
 //==================== 敵人 ====================
 function updateEnemy(e){
@@ -901,6 +931,30 @@ function draw(){
     ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.strokeRect(px,VH-7,14,14);
   }
   ctx.fillStyle='#37c24f';ctx.fillRect(W-20,VH-8,6,16);
+  // 倒數與暫停疊加層
+  if(state==='count'){
+    ctx.fillStyle='rgba(10,8,20,.45)';ctx.fillRect(0,0,W,H);
+    const n=Math.ceil(countT/60);
+    ctx.textAlign='center';
+    ctx.font='bold 26px "Microsoft JhengHei",sans-serif';
+    ctx.lineWidth=5;ctx.strokeStyle='#000';ctx.strokeText(THEME.name+'　'+THEME.hint,W/2,H/2-70);
+    ctx.fillStyle='#9fe3ff';ctx.fillText(THEME.name+'　'+THEME.hint,W/2,H/2-70);
+    const big=n>0?String(n):'GO!';
+    ctx.font='bold 96px "Microsoft JhengHei",sans-serif';
+    ctx.lineWidth=8;ctx.strokeText(big,W/2,H/2+40);
+    ctx.fillStyle='#ffd84d';ctx.fillText(big,W/2,H/2+40);
+    ctx.textAlign='left';
+  }
+  if(state==='pause'){
+    ctx.fillStyle='rgba(10,8,20,.6)';ctx.fillRect(0,0,W,H);
+    ctx.textAlign='center';
+    ctx.font='bold 44px "Microsoft JhengHei",sans-serif';
+    ctx.lineWidth=6;ctx.strokeStyle='#000';ctx.strokeText('⏸ 暫停中',W/2,H/2-10);
+    ctx.fillStyle='#fff';ctx.fillText('⏸ 暫停中',W/2,H/2-10);
+    ctx.font='bold 18px "Microsoft JhengHei",sans-serif';
+    ctx.fillStyle='#9fe3ff';ctx.fillText('按 P 或 ⏸ 按鈕繼續',W/2,H/2+30);
+    ctx.textAlign='left';
+  }
 }
 //==================== 公主小鎮（心動小鎮風格的家園系統）====================
 const SHOP=[
@@ -1013,12 +1067,22 @@ function drawTownPrincess(c,x,y,dress,dress2){
 //==================== 主迴圈 ====================
 function update(){
   frame++;
+  if(state==='count'){
+    const prev=Math.ceil(countT/60);
+    countT--;
+    const now=Math.ceil(countT/60);
+    if(now!==prev&&now>0)tone(660,.12,'square',.12);
+    if(countT<=0){state='play';gameFrames=0;startBGM();tone(988,.3,'square',.13);
+      toast(p1.x+170,300,THEME.name+'！'+THEME.hint,'#ffd84d');}
+  }
   if(state==='play'){
     gameFrames++;
     for(const p of players)updatePlayer(p);
     enemies=enemies.filter(e=>e.dead<30);
     for(const e of enemies)updateEnemy(e);
     bananas=bananas.filter(b=>!b.hit);
+  }
+  if(state!=='pause'){   // 煙火等粒子在結算時也要繼續飄
     for(const pt of particles){pt.x+=pt.vx;pt.y+=pt.vy;pt.vy+=.25;pt.life--;}
     particles=particles.filter(pt=>pt.life>0);
     for(const tx of texts){tx.y-=.45;tx.life--;}
@@ -1038,15 +1102,16 @@ function resetGame(){
     p.streak=0;p.bestStreak=0;p.answeredCount=0;p.zapT=0;p.item=null;p.shield=false;p.magnetT=0;
     p.boostT=0;p.boostPow=5.2;p.stunT=0;p.invT=0;p.frozen=false;p.quiz=null;p.stunAfter=0;
     p.safeX=p.spawn;p.safeY=13*T-p.h;p.shakeT=0;p.alertT=0;p.atFlag=false;p.wrongList=[];
-    p.jumpsLeft=2;p.coyote=0;p.mcorr=0;p.mwrong=0;
+    p.jumpsLeft=2;p.coyote=0;p.mcorr=0;p.mwrong=0;p.recentQ=[];
     p.dLvl=lsGet('pmgLvl_'+p.grade,1);
     p.pets=[];p.petOrder=shuffle([...MONSTERS.keys()]);
     p.usedQ=new Set();p.flagMsgT=0;
     panelOf(p).classList.add('hidden');
   }
-  particles=[];texts=[];bananas=[];winner=null;coopWin=false;gameFrames=0;state='play';
-  bgmStep=0;startBGM();
-  setTimeout(()=>{toast(p1.x+200,300,THEME.name+'！'+THEME.hint,'#ffd84d');},300);
+  particles=[];texts=[];bananas=[];winner=null;coopWin=false;gameFrames=0;
+  bgmStep=0;stopBGM();
+  state='count';countT=185;   // 3-2-1-GO 倒數開場
+  lsSet('pmgSel',{g1:chosenGrade[1],g2:chosenGrade[2],mode:gameMode});
 }
 function showEnd(){
   const earned=p1.coins+p2.coins+p1.correct+p2.correct;
@@ -1116,6 +1181,17 @@ bindTouch('t2j',()=>{p2.jumpBuf=7;},()=>{if(p2.vy<-4)p2.vy*=.55;});
 bindTouch('t2z',()=>useItem(p2));
 if(window.matchMedia&&matchMedia('(pointer:coarse)').matches)
   document.getElementById('wrap').classList.add('touch');
+
+// 記住上次的模式與年級選擇
+(function(){
+  const sel=lsGet('pmgSel',null); if(!sel)return;
+  chosenGrade[1]=sel.g1||chosenGrade[1]; chosenGrade[2]=sel.g2||chosenGrade[2];
+  gameMode=sel.mode||gameMode;
+  document.querySelectorAll('.gbtn[data-g]').forEach(b=>
+    b.classList.toggle('active',chosenGrade[b.dataset.p]===b.dataset.g));
+  document.querySelectorAll('.mbtn').forEach(b=>
+    b.classList.toggle('active',b.dataset.m===gameMode));
+})();
 
 buildLevel();
 update();
