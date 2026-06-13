@@ -67,8 +67,8 @@ body{background:#1a1c2c;display:flex;flex-direction:column;align-items:center;ju
 .qbtn.bad{background:#9b2226;border-color:#ff8589;}
 .qbtn:disabled{cursor:default;}
 .qexp{margin-top:8px;font-size:14px;line-height:1.5;background:rgba(255,255,255,.1);padding:6px 10px;border-left:4px solid #e9a823;}
-.screen{position:absolute;inset:0;background:rgba(12,10,24,.92);display:flex;align-items:center;justify-content:center;z-index:10;color:#fff;text-align:center;overflow-y:auto;}
-.panel{max-width:880px;width:96%;padding:10px 0;}
+.screen{position:absolute;inset:0;background:rgba(12,10,24,.92);display:flex;align-items:flex-start;justify-content:center;z-index:10;color:#fff;text-align:center;overflow-y:auto;padding:10px 0;}
+.panel{max-width:880px;width:96%;padding:10px 0 18px;margin:0 auto;}
 h1{font-size:28px;color:#ffd84d;text-shadow:3px 3px 0 #7a4a00;margin-bottom:4px;line-height:1.16;overflow-wrap:anywhere;}
 .sub{color:#9fe3ff;margin-bottom:10px;font-size:14px;}
 .cols{display:flex;gap:12px;justify-content:center;margin-bottom:10px;flex-wrap:wrap;}
@@ -77,7 +77,7 @@ h1{font-size:28px;color:#ffd84d;text-shadow:3px 3px 0 #7a4a00;margin-bottom:4px;
 .p1c{border-color:#5bc8e8;} .p1c b{color:#9fe0ff;}
 .p2c{border-color:#5b8de8;} .p2c b{color:#a8baff;}
 kbd{background:#333;border:1px solid #777;border-bottom:3px solid #777;padding:1px 6px;font-family:inherit;border-radius:3px;font-size:12px;}
-.gradeSel{margin-top:6px;}
+.gradeSel{margin-top:6px;display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
 .gbtn{font-family:inherit;font-size:14px;font-weight:bold;padding:3px 14px;background:#333;color:#aaa;border:2px solid #666;cursor:pointer;}
 .gbtn.active{background:#e9a823;color:#3a2a00;border-color:#ffd84d;}
 .rules{font-size:12.5px;color:#ddd;margin-bottom:12px;line-height:1.85;}
@@ -103,12 +103,16 @@ body.minecraft-play .touch .tbtn{display:flex;}
   background:#2e7d32;color:#fff;border:2px solid #7ae582;cursor:pointer;}
 .shopBtn.owned{background:#444;border-color:#888;color:#bbb;cursor:default;}
 .shopBtn.poor{background:#5a3a3a;border-color:#996;}
-.townFrame{position:relative;width:100%;margin-top:8px;}
-#townCv{width:100%;border:3px solid #555;border-radius:6px;background:#9fd6f0;display:block;touch-action:none;}
+#townScr .panel{height:calc(100% - 12px);display:flex;flex-direction:column;align-items:center;overflow:hidden;}
+#townScr h1{flex:0 0 auto;}
+#townScr .sub{flex:0 0 auto;margin-bottom:6px;}
+#shopBar{width:100%;max-height:92px;overflow-y:auto;overscroll-behavior:contain;padding:3px 2px;border:1px solid rgba(255,255,255,.16);background:rgba(0,0,0,.16);border-radius:6px;}
+.townFrame{position:relative;width:100%;height:clamp(230px,52%,330px);margin-top:6px;flex:1 1 auto;}
+#townCv{width:100%;height:100%;border:3px solid #555;border-radius:6px;background:#9fd6f0;display:block;touch-action:none;}
 .townHud{position:absolute;left:8px;top:8px;right:8px;display:flex;gap:6px;align-items:flex-start;justify-content:space-between;pointer-events:none;}
 .townChip{background:rgba(18,28,38,.78);border:2px solid rgba(255,255,255,.42);border-radius:6px;color:#fff;padding:5px 8px;font-size:12px;font-weight:bold;text-align:left;line-height:1.35;text-shadow:0 1px 0 rgba(0,0,0,.35);}
 .townChip.gold{color:#ffe58a;border-color:rgba(255,229,138,.65);}
-.townActions{min-height:38px;margin-top:8px;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;}
+.townActions{width:100%;min-height:38px;margin-top:8px;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;}
 .townActionBtn{font-family:inherit;font-size:13px;font-weight:bold;padding:7px 11px;border-radius:6px;border:2px solid #ffe58a;background:#2e3b48;color:#fff;cursor:pointer;}
 .townActionBtn:active{transform:translateY(1px);}
 .townHint{font-size:12px;color:#d6ecff;}
@@ -129,15 +133,18 @@ body.minecraft-play .touch .tbtn{display:flex;}
   .qtext{font-size:15px;} .qbtn{font-size:13px;padding:5px 8px;}
   .qtip,.qexp{font-size:11px;} .qtag,.qwho,.qtimer{font-size:11px;}
   .qbox{padding:8px 10px;}
-  #townCv{height:auto;aspect-ratio:900/460;}
+  #townCv{height:100%;}
   .townChip{font-size:10px;padding:4px 6px;max-width:64%;}
   .townActionBtn{font-size:12px;padding:6px 9px;}
+  #shopBar{max-height:76px;}
 }
 @media (max-width:520px) and (orientation:portrait){
   body{justify-content:flex-start;background:#101420;}
   #wrap{width:100vw;min-height:100vh;}
   #wrap > canvas{min-height:100vh;object-fit:cover;}
-  .panel{width:94%;padding:12px 0 18px;}
+  .screen{padding:6px 0;}
+  .panel{width:94%;padding:8px 0 12px;}
+  #townScr .panel{height:calc(100% - 12px);}
   h1{font-size:16px;text-shadow:2px 2px 0 #7a4a00;}
   .rules{max-height:138px;overflow:auto;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.12);padding:7px;border-radius:6px;}
   .cols{gap:7px;margin-bottom:8px;}
@@ -153,9 +160,12 @@ body.minecraft-play .touch .tbtn{display:flex;}
   .smoothPad button{width:42px;height:42px;font-size:20px;}
   .smoothAct{width:52px;height:52px;font-size:25px;}
   .townHud{left:6px;right:6px;top:6px;}
+  .townFrame{height:auto;aspect-ratio:900/460;flex:0 0 auto;margin-top:5px;}
   .townPad{grid-template-columns:42px 42px 42px;grid-template-rows:42px 42px;gap:6px;}
   .townMoveBtn{width:42px;height:42px;font-size:20px;}
   .townQuickBtn{width:52px;height:52px;}
+  #shopBar{max-height:64px;}
+  .shopBtn{font-size:11px;padding:3px 6px;margin:2px;}
 }
 </style>
 </head>
@@ -240,13 +250,13 @@ body.minecraft-play .touch .tbtn{display:flex;}
         移動 <kbd>A</kbd><kbd>D</kbd>　跳躍 <kbd>W</kbd>（連按兩下＝二段跳）　🎁道具 <kbd>S</kbd><br>
         答題 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd>
         <div class="gradeSel">題目年級：
-          <button class="gbtn" data-p="1" data-g="grade2">二下</button><button class="gbtn active" data-p="1" data-g="grade5">五下</button>
+          <button class="gbtn" data-p="1" data-g="grade2">二下</button><button class="gbtn" data-p="1" data-g="grade3">三上</button><button class="gbtn active" data-p="1" data-g="grade5">五下</button><button class="gbtn" data-p="1" data-g="grade6">六上</button>
         </div></div>
       <div class="card p2c"><b>💫 玩家二：羅潔塔妹妹</b><br>
         移動 <kbd>←</kbd><kbd>→</kbd>　跳躍 <kbd>↑</kbd>（連按兩下＝二段跳）　🎁道具 <kbd>↓</kbd><br>
         答題 <kbd>7</kbd><kbd>8</kbd><kbd>9</kbd><kbd>0</kbd>
         <div class="gradeSel">題目年級：
-          <button class="gbtn active" data-p="2" data-g="grade2">二下</button><button class="gbtn" data-p="2" data-g="grade5">五下</button>
+          <button class="gbtn active" data-p="2" data-g="grade2">二下</button><button class="gbtn" data-p="2" data-g="grade3">三上</button><button class="gbtn" data-p="2" data-g="grade5">五下</button><button class="gbtn" data-p="2" data-g="grade6">六上</button>
         </div></div>
     </div>
     <div class="rules">
@@ -1184,7 +1194,7 @@ const TOWN_INTERIORS={
  cafe:{n:'星糖咖啡館',bg:'#f1e2ff',floor:'#cba8e0',objects:[
   {id:'door',n:'咖啡館門口',kind:'door',x:450,y:430,r:70,actions:['exit']},
   {id:'coffee',n:'咖啡吧',kind:'counter',x:480,y:155,r:82,actions:['coffee','cake']},
-  {id:'sofa',n:'小沙發',kind:'sofa',x:210,y:275,r:72,actions:['rest']},
+  {id:'sofa',n:'小沙發',kind:'sofa',x:210,y:275,r:72,actions:['sit','rest']},
   {id:'petCafeBed',n:'寵物小墊',kind:'petBed',x:720,y:285,r:74,actions:['feed','pet']}
  ]},
  gameRoom:{n:'遊戲室',bg:'#dce8ff',floor:'#94b8ef',objects:[
@@ -1231,7 +1241,7 @@ const tcv=document.getElementById('townCv'), tctx=tcv.getContext('2d');
 const townTouchKeys=new Set();
 let townInterior=null,townActionSig='',townHudSig='',townNearby=null;
 const townCam={x:0,y:0};
-const townPlayer={x:520,y:500,vx:0,vy:0,dir:1,walk:0,actT:0,actText:''};
+const townPlayer={x:520,y:500,vx:0,vy:0,dir:1,walk:0,pose:'stand',poseT:0,actT:0,actText:''};
 let townPets=[];
 function saveTown(){lsSet('pmgTown',townData);lsSet('pmgTownLife',townLife);}
 function townHas(id){return townData.owned.includes(id);}
@@ -1291,6 +1301,10 @@ function townSay(text,sound){
   saveTown();townHudSig='';updateTownHud();townActionSig='';
   if(sound==='buy')sfx.buy();else if(sound==='pet')sfx.capture();else if(sound==='eat')sfx.coin();else sfx.shield();
 }
+function townSetPose(pose='stand',frames=150){
+  townPlayer.pose=pose;
+  townPlayer.poseT=frames;
+}
 function getTownActionSpec(id,target){
   const specs={
     exit:{label:'🚪 出門',run:()=>exitTownInterior()},
@@ -1299,17 +1313,18 @@ function getTownActionSpec(id,target){
     brush:{label:'🪥 刷牙',run:()=>{townLife.clean+=12;townSay('刷牙完成，牙齒亮晶晶','');}},
     wash:{label:'🧼 洗臉',run:()=>{townLife.clean+=10;townSay('洗完臉，好清爽','');}},
     toilet:{label:'🚽 上廁所',run:()=>{townLife.clean+=5;townSay('上完廁所，記得洗手','');}},
-    eat:{label:'🍽️ 吃飯',run:()=>{townLife.energy+=14;townLife.mood+=5;townSay('好好吃飯，體力回來了','eat');}},
-    tea:{label:'🍵 喝下午茶',run:()=>{townLife.energy+=8;townLife.mood+=8;townSay('喝了皇家下午茶','eat');}},
-    coffee:{label:'☕ 喝咖啡',run:()=>{townLife.energy+=12;townLife.mood+=6;townSay('喝了香香的咖啡','eat');}},
-    cake:{label:'🍰 吃蛋糕',run:()=>{townLife.energy+=9;townLife.mood+=10;townSay('蛋糕讓心情變好了','eat');}},
-    bread:{label:'🥐 吃麵包',run:()=>{townLife.energy+=10;townLife.food+=1;townSay('吃了剛出爐麵包，還帶走一份寵物點心','eat');}},
+    eat:{label:'🍽️ 坐下吃飯',run:()=>{townSetPose('sit',190);townLife.energy+=14;townLife.mood+=5;townSay('公主坐下吃飯，體力回來了','eat');}},
+    tea:{label:'🍵 坐下喝下午茶',run:()=>{townSetPose('sit',190);townLife.energy+=8;townLife.mood+=8;townSay('坐下喝了皇家下午茶','eat');}},
+    coffee:{label:'☕ 坐下喝咖啡',run:()=>{townSetPose('sit',190);townLife.energy+=12;townLife.mood+=6;townSay('坐下喝了香香的咖啡','eat');}},
+    cake:{label:'🍰 坐下吃蛋糕',run:()=>{townSetPose('sit',190);townLife.energy+=9;townLife.mood+=10;townSay('坐下吃蛋糕，心情變好了','eat');}},
+    bread:{label:'🥐 坐下吃麵包',run:()=>{townSetPose('sit',190);townLife.energy+=10;townLife.food+=1;townSay('坐下吃剛出爐麵包，還帶走一份寵物點心','eat');}},
     bake:{label:'🍞 烤麵包',run:()=>{townLife.food+=2;townLife.mood+=6;townSay('烤好小麵包，寵物食物 +2','eat');}},
-    dessert:{label:'🧁 吃甜點',run:()=>{townLife.mood+=10;townSay('甜點時間超幸福','eat');}},
-    juice:{label:'🧃 喝果汁',run:()=>{townLife.energy+=8;townSay('喝了水果汁','eat');}},
-    snack:{label:'🍿 吃點心',run:()=>{townLife.energy+=6;townLife.mood+=5;townSay('玩遊戲配點心最開心','eat');}},
+    dessert:{label:'🧁 坐下吃甜點',run:()=>{townSetPose('sit',190);townLife.mood+=10;townSay('坐下享受甜點時間','eat');}},
+    juice:{label:'🧃 坐下喝果汁',run:()=>{townSetPose('sit',180);townLife.energy+=8;townSay('坐下喝了水果汁','eat');}},
+    snack:{label:'🍿 坐下吃點心',run:()=>{townSetPose('sit',180);townLife.energy+=6;townLife.mood+=5;townSay('坐下吃點心，玩遊戲更開心','eat');}},
     bath:{label:'🛁 泡澡',run:()=>{townLife.clean+=22;townLife.energy+=6;townSay('泡泡澡完成，整個人香香的','');}},
-    rest:{label:'🛋️ 休息一下',run:()=>{townLife.energy+=14;townLife.mood+=4;townSay('坐下來休息一下','');}},
+    sit:{label:'🪑 坐下',run:()=>{townSetPose('sit',220);townLife.energy+=6;townLife.mood+=4;townSay('公主坐下來，腳腳放鬆一下','');}},
+    rest:{label:'🛋️ 坐下休息久一點',run:()=>{townSetPose('sit',240);townLife.energy+=14;townLife.mood+=4;townSay('坐在沙發上休息，整個人放鬆了','');}},
     read:{label:'📖 看故事書',run:()=>{townLife.mood+=8;townSay('讀了一本新的故事書','');}},
     draw:{label:'🎨 畫圖',run:()=>{townLife.mood+=9;townSay('畫了一張新作品','');}},
     craft:{label:'✂️ 做紙偶',run:()=>{townLife.mood+=10;townSay('完成新的紙偶場景','');}},
@@ -1393,7 +1408,13 @@ function updateTown(){
   let dx=(right?1:0)-(left?1:0),dy=(down?1:0)-(up?1:0);
   const len=Math.hypot(dx,dy)||1,spd=townInterior?3.1:3.6;
   townPlayer.vx=dx/len*spd;townPlayer.vy=dy/len*spd;
-  if(dx||dy){townPlayer.x+=townPlayer.vx;townPlayer.y+=townPlayer.vy;townPlayer.walk+=.22;townPlayer.dir=dx<0?-1:dx>0?1:townPlayer.dir;}
+  if(dx||dy){
+    townPlayer.x+=townPlayer.vx;townPlayer.y+=townPlayer.vy;townPlayer.walk+=.22;townPlayer.dir=dx<0?-1:dx>0?1:townPlayer.dir;
+    townPlayer.pose='stand';townPlayer.poseT=0;
+  }else if(townPlayer.poseT>0){
+    townPlayer.poseT--;
+    if(townPlayer.poseT<=0)townPlayer.pose='stand';
+  }
   const maxX=townInterior?TOWN_VIEW_W-38:TOWN_WORLD_W-38,maxY=townInterior?TOWN_VIEW_H-40:TOWN_WORLD_H-38;
   townPlayer.x=clamp(townPlayer.x,38,maxX);townPlayer.y=clamp(townPlayer.y,78,maxY);
   townPets.forEach((p,i)=>{
@@ -1487,6 +1508,21 @@ function drawTownObject(c,o){
 function drawTownPetBed(c,x,y,i){drawRoundRect(c,x-34,y-20,68,40,18,['#ffd5e5','#d8c7ff','#d5f2ff'][i%3],'#fff6');c.fillStyle='#fff6';c.fillRect(x-20,y-8,40,12);}
 function drawTownPlayer(c,x,y){
   const bob=Math.sin(townPlayer.walk)*4;
+  if(townPlayer.pose==='sit'){
+    c.save();c.translate(x,y+12);c.scale(townPlayer.dir,1);
+    drawRoundRect(c,-25,2,50,16,7,'#8a5b33','#5a3922');
+    c.fillStyle='#6a4326';c.fillRect(-22,14,8,22);c.fillRect(14,14,8,22);
+    c.fillStyle='#7c3c10';c.fillRect(-24,32,20,8);c.fillRect(5,32,24,8);
+    c.fillStyle='#3a9fc0';drawRoundRect(c,-20,-4,40,28,10,'#3a9fc0');
+    c.fillStyle='#5bc8e8';drawRoundRect(c,-18,-28,36,30,10,'#5bc8e8');c.fillRect(-25,-7,50,15);
+    c.fillStyle='#ffe3c2';drawRoundRect(c,-14,-54,28,26,9,'#ffe3c2');
+    c.fillStyle='#f5d05d';c.fillRect(-18,-62,36,16);c.fillRect(-22,-50,8,18);c.fillRect(14,-50,8,18);
+    c.fillStyle='#23314f';c.fillRect(-7,-44,4,5);c.fillRect(6,-44,4,5);
+    c.fillStyle='#ffd21f';c.fillRect(-13,-70,26,7);for(let i=-1;i<=1;i++)c.fillRect(i*9-3,-79-Math.abs(i)*2,6,10);
+    c.fillStyle='#fff0bf';c.font='bold 12px "Microsoft JhengHei",sans-serif';c.textAlign='center';c.fillText('坐下中',0,-88);c.textAlign='left';
+    c.restore();
+    return;
+  }
   c.save();c.translate(x,y+bob*.15);c.scale(townPlayer.dir,1);
   c.fillStyle='#7c3c10';c.fillRect(-14,18+Math.max(0,bob),9,8);c.fillRect(5,18+Math.max(0,-bob),9,8);
   c.fillStyle='#3a9fc0';c.fillRect(-18,-2,36,22);
