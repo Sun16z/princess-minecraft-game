@@ -712,17 +712,36 @@ function speckle(x,y,c,r,dark,light){
     ctx.fillRect(x+((u*4)|0)*8,y+((v*4)|0)*8,8,8);}
   ctx.globalAlpha=1;
 }
+//==================== 靜態地形預繪快取（手機效能關鍵）====================
+// 把草/土/石/木板各預先畫成 6 種變化的小圖，遊戲中每塊只 drawImage 一次
+const tileCache={grass:[],dirt:[],stone:[],plank:[]};
+function cacheSpeckle(cc,seed,dark,light){
+  for(let i=0;i<6;i++){const u=h2(seed*31+i*7,seed*17+i*5),v=h2(seed*13+i*3,seed*29+i*11);
+    cc.fillStyle=u>.5?dark:light;cc.globalAlpha=.28;
+    cc.fillRect(((u*4)|0)*8,((v*4)|0)*8,8,8);}
+  cc.globalAlpha=1;
+}
+function makeTile(fn){const cn=document.createElement('canvas');cn.width=T;cn.height=T;fn(cn.getContext('2d'));return cn;}
+function buildTileCache(){
+  tileCache.grass=[];tileCache.dirt=[];tileCache.stone=[];tileCache.plank=[];
+  for(let v=0;v<6;v++){
+    tileCache.dirt.push(makeTile(cc=>{cc.fillStyle=THEME.dirt;cc.fillRect(0,0,T,T);cacheSpeckle(cc,v,THEME.dirtA,THEME.dirtB);}));
+    tileCache.grass.push(makeTile(cc=>{cc.fillStyle=THEME.dirt;cc.fillRect(0,0,T,T);cacheSpeckle(cc,v,THEME.dirtA,THEME.dirtB);
+      cc.fillStyle=THEME.grass;cc.fillRect(0,0,T,10);
+      cc.fillStyle=THEME.grassDk;
+      for(let i=0;i<4;i++){const u=h2(v*5+i,1+i*9);cc.fillRect(((u*8)|0)*4,0,4,5);cc.fillRect(((u*8)|0)*4,8,4,4);}}));
+    tileCache.stone.push(makeTile(cc=>{cc.fillStyle='#8d8d8d';cc.fillRect(0,0,T,T);cacheSpeckle(cc,v,'#6f6f6f','#a5a5a5');}));
+    tileCache.plank.push(makeTile(cc=>{cc.fillStyle='#b8945f';cc.fillRect(0,0,T,T);cacheSpeckle(cc,v,'#9a7747','#c8a571');
+      cc.fillStyle='#9a7747';cc.fillRect(0,10,T,2);cc.fillRect(0,22,T,2);}));
+  }
+}
+function vIdx(c,r){return (h2(c,r)*6)|0;}
 function drawTile(t,c,r){
   const x=c*T,y=r*T;
-  if(t===1){ctx.fillStyle=THEME.dirt;ctx.fillRect(x,y,T,T);speckle(x,y,c,r,THEME.dirtA,THEME.dirtB);
-    ctx.fillStyle=THEME.grass;ctx.fillRect(x,y,T,10);
-    ctx.fillStyle=THEME.grassDk;
-    for(let i=0;i<4;i++){const u=h2(c*5+i,r+i*9);ctx.fillRect(x+((u*8)|0)*4,y,4,5);
-      ctx.fillRect(x+((u*8)|0)*4,y+8,4,4);}}
-  else if(t===2){ctx.fillStyle=THEME.dirt;ctx.fillRect(x,y,T,T);speckle(x,y,c,r,THEME.dirtA,THEME.dirtB);}
-  else if(t===3){ctx.fillStyle='#8d8d8d';ctx.fillRect(x,y,T,T);speckle(x,y,c,r,'#6f6f6f','#a5a5a5');}
-  else if(t===4){ctx.fillStyle='#b8945f';ctx.fillRect(x,y,T,T);speckle(x,y,c,r,'#9a7747','#c8a571');
-    ctx.fillStyle='#9a7747';ctx.fillRect(x,y+10,T,2);ctx.fillRect(x,y+22,T,2);}
+  if(t===1){ctx.drawImage(tileCache.grass[vIdx(c,r)],x,y);}
+  else if(t===2){ctx.drawImage(tileCache.dirt[vIdx(c,r)],x,y);}
+  else if(t===3){ctx.drawImage(tileCache.stone[vIdx(c,r)],x,y);}
+  else if(t===4){ctx.drawImage(tileCache.plank[vIdx(c,r)],x,y);}
   else if(t===5||t===11){
     if(viewP&&viewP.usedQ.has(c+','+r)){
       ctx.fillStyle='#9a7a4a';ctx.fillRect(x,y,T,T);speckle(x,y,c,r,'#7d6038','#ab8b58');
@@ -857,10 +876,16 @@ function drawWorld(camx){
   }
   ctx.globalAlpha=1;ctx.textAlign='left';
 }
+let skyGrad={theme:null,top:null,bot:null};
+function skyGradFor(vy){
+  if(skyGrad.theme!==THEME){skyGrad.theme=THEME;
+    [['top',0],['bot',VH]].forEach(([k,y])=>{
+      const g=ctx.createLinearGradient(0,y,0,y+VH);
+      g.addColorStop(0,THEME.skyA);g.addColorStop(1,THEME.skyB);skyGrad[k]=g;});}
+  return vy===0?skyGrad.top:skyGrad.bot;
+}
 function drawSky(vy,camx){
-  const g=ctx.createLinearGradient(0,vy,0,vy+VH);
-  g.addColorStop(0,THEME.skyA);g.addColorStop(1,THEME.skyB);
-  ctx.fillStyle=g;ctx.fillRect(0,vy,W,VH);
+  ctx.fillStyle=skyGradFor(vy);ctx.fillRect(0,vy,W,VH);
   if(THEME.night){
     ctx.fillStyle='#fffbe8';
     for(let i=0;i<40;i++){const u=h2(i*13,7),v=h2(i*29,3);
@@ -1096,6 +1121,7 @@ function update(){
 function resetGame(){
   buildLevel();
   THEME=THEMES[irnd(THEMES.length)];
+  buildTileCache();
   p1.grade=chosenGrade[1];p2.grade=chosenGrade[2];
   for(const p of players){
     p.x=p.spawn;p.y=11*T;p.vx=0;p.vy=0;p.coins=0;p.correct=0;p.wrongN=0;
@@ -1194,6 +1220,7 @@ if(window.matchMedia&&matchMedia('(pointer:coarse)').matches)
 })();
 
 buildLevel();
+buildTileCache();
 update();
 </script>
 </body>
