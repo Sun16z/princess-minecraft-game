@@ -103,6 +103,21 @@ body.minecraft-play .touch .tbtn{display:flex;}
   background:#2e7d32;color:#fff;border:2px solid #7ae582;cursor:pointer;}
 .shopBtn.owned{background:#444;border-color:#888;color:#bbb;cursor:default;}
 .shopBtn.poor{background:#5a3a3a;border-color:#996;}
+.townFrame{position:relative;width:100%;margin-top:8px;}
+#townCv{width:100%;border:3px solid #555;border-radius:6px;background:#9fd6f0;display:block;touch-action:none;}
+.townHud{position:absolute;left:8px;top:8px;right:8px;display:flex;gap:6px;align-items:flex-start;justify-content:space-between;pointer-events:none;}
+.townChip{background:rgba(18,28,38,.78);border:2px solid rgba(255,255,255,.42);border-radius:6px;color:#fff;padding:5px 8px;font-size:12px;font-weight:bold;text-align:left;line-height:1.35;text-shadow:0 1px 0 rgba(0,0,0,.35);}
+.townChip.gold{color:#ffe58a;border-color:rgba(255,229,138,.65);}
+.townActions{min-height:38px;margin-top:8px;display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;}
+.townActionBtn{font-family:inherit;font-size:13px;font-weight:bold;padding:7px 11px;border-radius:6px;border:2px solid #ffe58a;background:#2e3b48;color:#fff;cursor:pointer;}
+.townActionBtn:active{transform:translateY(1px);}
+.townHint{font-size:12px;color:#d6ecff;}
+.townPad{position:absolute;left:10px;bottom:10px;display:none;grid-template-columns:46px 46px 46px;grid-template-rows:46px 46px;gap:7px;z-index:2;}
+.townMoveBtn,.townQuickBtn{width:46px;height:46px;border-radius:10px;border:2px solid rgba(255,255,255,.62);background:rgba(20,28,38,.52);color:#fff;font-size:22px;font-weight:bold;touch-action:none;}
+.townPad .up{grid-column:2;grid-row:1}.townPad .left{grid-column:1;grid-row:2}.townPad .down{grid-column:2;grid-row:2}.townPad .right{grid-column:3;grid-row:2}
+.townQuickBtn{position:absolute;right:12px;bottom:14px;display:none;z-index:2;width:56px;height:56px;font-size:25px;}
+.touch .townPad{display:grid;}
+.touch .townQuickBtn{display:block;}
 @media (max-width:760px){
   h1{font-size:18px;} .sub{font-size:12px;} .rules{font-size:11px;line-height:1.7;}
   .versionSel,.characterSel{grid-template-columns:1fr;gap:7px;margin-bottom:8px;}
@@ -114,6 +129,9 @@ body.minecraft-play .touch .tbtn{display:flex;}
   .qtext{font-size:15px;} .qbtn{font-size:13px;padding:5px 8px;}
   .qtip,.qexp{font-size:11px;} .qtag,.qwho,.qtimer{font-size:11px;}
   .qbox{padding:8px 10px;}
+  #townCv{height:auto;aspect-ratio:900/460;}
+  .townChip{font-size:10px;padding:4px 6px;max-width:64%;}
+  .townActionBtn{font-size:12px;padding:6px 9px;}
 }
 @media (max-width:520px) and (orientation:portrait){
   body{justify-content:flex-start;background:#101420;}
@@ -134,6 +152,10 @@ body.minecraft-play .touch .tbtn{display:flex;}
   .smoothPad{grid-template-columns:42px 42px 42px;grid-template-rows:42px 42px;gap:7px;}
   .smoothPad button{width:42px;height:42px;font-size:20px;}
   .smoothAct{width:52px;height:52px;font-size:25px;}
+  .townHud{left:6px;right:6px;top:6px;}
+  .townPad{grid-template-columns:42px 42px 42px;grid-template-rows:42px 42px;gap:6px;}
+  .townMoveBtn{width:42px;height:42px;font-size:20px;}
+  .townQuickBtn{width:52px;height:52px;}
 }
 </style>
 </head>
@@ -247,8 +269,22 @@ body.minecraft-play .touch .tbtn{display:flex;}
 
   <div id="townScr" class="screen hidden"><div class="panel">
     <h1>🏘️ 公主小鎮</h1>
-    <div class="sub">用冒險賺到的金幣裝飾小鎮，收服的寵物會搬進來住！　小鎮基金：<b id="townCoins" style="color:#ffd84d">0</b> 🪙</div>
-    <canvas id="townCv" width="900" height="320" style="width:100%;border:3px solid #555;border-radius:4px;background:#9fd6f0"></canvas>
+    <div class="sub">走近建築、家具或寵物會出現互動選項。小鎮基金：<b id="townCoins" style="color:#ffd84d">0</b> 🪙</div>
+    <div class="townFrame">
+      <canvas id="townCv" width="900" height="460"></canvas>
+      <div class="townHud">
+        <div class="townChip" id="townPlace">小鎮廣場</div>
+        <div class="townChip gold" id="townStatus">食物 6｜寵物心情 50</div>
+      </div>
+      <div class="townPad" aria-label="小鎮移動控制">
+        <button class="townMoveBtn up" data-town-key="ArrowUp" title="上" aria-label="上">▲</button>
+        <button class="townMoveBtn left" data-town-key="ArrowLeft" title="左" aria-label="左">◀</button>
+        <button class="townMoveBtn down" data-town-key="ArrowDown" title="下" aria-label="下">▼</button>
+        <button class="townMoveBtn right" data-town-key="ArrowRight" title="右" aria-label="右">▶</button>
+      </div>
+      <button class="townQuickBtn" id="townQuick" title="互動" aria-label="互動">✦</button>
+    </div>
+    <div id="townActions" class="townActions"><span class="townHint">靠近物件後可以互動</span></div>
     <div id="shopBar" style="margin-top:8px"></div>
     <button class="bigbtn" id="btnTownBack" style="margin-top:10px;font-size:17px;padding:8px 30px">↩️ 返回</button>
   </div></div>
@@ -270,6 +306,7 @@ let viewP=null, townOpen=false, countT=0;
 //==================== 存檔工具 ====================
 function lsGet(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 
 //==================== 主題世界 ====================
 const THEMES=[
@@ -1096,114 +1133,386 @@ function draw(){
     ctx.textAlign='left';
   }
 }
-//==================== 公主小鎮（心動小鎮風格的家園系統）====================
+//==================== 公主小鎮（可移動生活地圖）====================
+const TOWN_VIEW_W=900,TOWN_VIEW_H=460,TOWN_WORLD_W=2100,TOWN_WORLD_H=1320;
 const SHOP=[
  {id:'flower',n:'花圃',p:30},{id:'mailbox',n:'信箱',p:25},{id:'lamp',n:'路燈',p:40},
  {id:'tree',n:'蘋果樹',p:50},{id:'swing',n:'鞦韆',p:60},{id:'pond',n:'池塘',p:80},
- {id:'fountain',n:'噴水池',p:90},{id:'house',n:'小木屋',p:120},{id:'bakery',n:'麵包店',p:150},
- {id:'castle',n:'夢幻城堡',p:300}];
+ {id:'fountain',n:'噴水池',p:90},{id:'house',n:'小木屋裝潢',p:120},{id:'bakery',n:'麵包店裝潢',p:150},
+ {id:'restaurant',n:'湖畔餐廳',p:180},{id:'cafe',n:'咖啡館',p:130},{id:'gameRoom',n:'遊戲室',p:160},
+ {id:'library',n:'故事圖書館',p:140},{id:'bathhouse',n:'泡泡澡堂',p:170},{id:'petPark',n:'寵物樂園',p:150},
+ {id:'studio',n:'手作工作室',p:120},{id:'castle',n:'夢幻城堡裝潢',p:300}
+];
+const TOWN_BUILDINGS=[
+ {id:'house',n:'公主小屋',x:190,y:260,w:170,h:120,color:'#a66d3c',roof:'#7a4a22',inside:'home',public:true},
+ {id:'castle',n:'夢幻城堡',x:1650,y:190,w:230,h:170,color:'#bbb9cc',roof:'#ff74a8',inside:'castle',public:true},
+ {id:'bakery',n:'麵包店',x:780,y:235,w:185,h:120,color:'#e8b890',roof:'#c08858',inside:'bakery',public:true},
+ {id:'restaurant',n:'湖畔餐廳',x:1120,y:250,w:210,h:130,color:'#f0c982',roof:'#6aa878',inside:'restaurant',public:true},
+ {id:'cafe',n:'星糖咖啡館',x:1410,y:520,w:190,h:120,color:'#cfa8e8',roof:'#8c63b0',inside:'cafe',public:true},
+ {id:'gameRoom',n:'遊戲室',x:520,y:610,w:200,h:125,color:'#8eb7f2',roof:'#415d9c',inside:'gameRoom',public:true},
+ {id:'library',n:'故事圖書館',x:930,y:790,w:190,h:120,color:'#b99a70',roof:'#7c5638',inside:'library'},
+ {id:'bathhouse',n:'泡泡澡堂',x:1320,y:820,w:205,h:120,color:'#94d6e8',roof:'#5d9fb7',inside:'bathhouse'},
+ {id:'petPark',n:'寵物樂園',x:360,y:940,w:220,h:120,color:'#9fd67d',roof:'#5b9c47',inside:'petPark'},
+ {id:'studio',n:'手作工作室',x:1650,y:850,w:205,h:125,color:'#d7a2c8',roof:'#a35a92',inside:'studio'}
+];
+const TOWN_INTERIORS={
+ home:{n:'公主小屋',bg:'#f7e7d7',floor:'#d6b58d',objects:[
+  {id:'door',n:'門口',kind:'door',x:450,y:430,r:70,actions:['exit']},
+  {id:'sink',n:'洗手台',kind:'sink',x:170,y:150,r:62,actions:['brush','wash']},
+  {id:'toilet',n:'小廁所',kind:'toilet',x:170,y:300,r:62,actions:['toilet']},
+  {id:'table',n:'餐桌',kind:'table',x:460,y:210,r:78,actions:['eat']},
+  {id:'petBed',n:'寵物窩',kind:'petBed',x:710,y:300,r:76,actions:['feed','pet','napPet']}
+ ]},
+ castle:{n:'夢幻城堡',bg:'#eee9ff',floor:'#cfc6ee',objects:[
+  {id:'door',n:'城堡大門',kind:'door',x:450,y:430,r:70,actions:['exit']},
+  {id:'banquet',n:'皇家餐桌',kind:'table',x:450,y:230,r:80,actions:['eat','tea']},
+  {id:'mirror',n:'梳洗鏡',kind:'sink',x:185,y:180,r:62,actions:['wash']},
+  {id:'petThrone',n:'寵物王座窩',kind:'petBed',x:720,y:285,r:76,actions:['feed','pet']}
+ ]},
+ bakery:{n:'麵包店',bg:'#fff0d8',floor:'#e0b982',objects:[
+  {id:'door',n:'店門口',kind:'door',x:450,y:430,r:70,actions:['exit']},
+  {id:'counter',n:'麵包櫃',kind:'counter',x:450,y:170,r:80,actions:['bread','coffee']},
+  {id:'oven',n:'烤箱',kind:'oven',x:170,y:230,r:70,actions:['bake']},
+  {id:'petSnack',n:'寵物點心籃',kind:'petBowl',x:720,y:300,r:74,actions:['buyFood','feed']}
+ ]},
+ restaurant:{n:'湖畔餐廳',bg:'#f8e8c8',floor:'#d7aa73',objects:[
+  {id:'door',n:'餐廳門口',kind:'door',x:450,y:430,r:70,actions:['exit']},
+  {id:'meal',n:'家庭餐桌',kind:'table',x:430,y:210,r:85,actions:['eat','juice']},
+  {id:'dessert',n:'甜點吧',kind:'counter',x:705,y:180,r:70,actions:['dessert','buyFood']},
+  {id:'wash',n:'洗手台',kind:'sink',x:170,y:265,r:62,actions:['wash']}
+ ]},
+ cafe:{n:'星糖咖啡館',bg:'#f1e2ff',floor:'#cba8e0',objects:[
+  {id:'door',n:'咖啡館門口',kind:'door',x:450,y:430,r:70,actions:['exit']},
+  {id:'coffee',n:'咖啡吧',kind:'counter',x:480,y:155,r:82,actions:['coffee','cake']},
+  {id:'sofa',n:'小沙發',kind:'sofa',x:210,y:275,r:72,actions:['rest']},
+  {id:'petCafeBed',n:'寵物小墊',kind:'petBed',x:720,y:285,r:74,actions:['feed','pet']}
+ ]},
+ gameRoom:{n:'遊戲室',bg:'#dce8ff',floor:'#94b8ef',objects:[
+  {id:'door',n:'遊戲室門口',kind:'door',x:450,y:430,r:70,actions:['exit']},
+  {id:'arcade',n:'電玩機台',kind:'arcade',x:235,y:185,r:72,actions:['playGame']},
+  {id:'board',n:'桌遊桌',kind:'table',x:545,y:235,r:82,actions:['boardGame','snack']},
+  {id:'petToy',n:'寵物玩具箱',kind:'petBowl',x:735,y:320,r:74,actions:['pet','napPet']}
+ ]},
+ library:{n:'故事圖書館',bg:'#f3e7d0',floor:'#b89068',objects:[
+  {id:'door',n:'圖書館門口',kind:'door',x:450,y:430,r:70,actions:['exit']},
+  {id:'books',n:'故事書架',kind:'book',x:220,y:185,r:70,actions:['read']},
+  {id:'desk',n:'畫畫桌',kind:'table',x:560,y:250,r:78,actions:['draw']},
+  {id:'petReading',n:'安靜寵物窩',kind:'petBed',x:735,y:315,r:72,actions:['pet','napPet']}
+ ]},
+ bathhouse:{n:'泡泡澡堂',bg:'#ddf7ff',floor:'#9ed9eb',objects:[
+  {id:'door',n:'澡堂門口',kind:'door',x:450,y:430,r:70,actions:['exit']},
+  {id:'face',n:'洗臉台',kind:'sink',x:175,y:175,r:70,actions:['wash','brush']},
+  {id:'bath',n:'泡泡浴池',kind:'bath',x:505,y:220,r:95,actions:['bath']},
+  {id:'toilet',n:'乾淨廁所',kind:'toilet',x:735,y:270,r:66,actions:['toilet']}
+ ]},
+ petPark:{n:'寵物樂園',bg:'#e4ffd7',floor:'#92d66b',objects:[
+  {id:'door',n:'樂園出口',kind:'door',x:450,y:430,r:70,actions:['exit']},
+  {id:'bowl',n:'寵物餐碗',kind:'petBowl',x:250,y:260,r:74,actions:['feed','buyFood']},
+  {id:'petNest',n:'寵物小窩',kind:'petBed',x:560,y:285,r:82,actions:['feed','pet','napPet']},
+  {id:'toy',n:'玩具球',kind:'toy',x:710,y:170,r:68,actions:['pet','playPet']}
+ ]},
+ studio:{n:'手作工作室',bg:'#ffe4f4',floor:'#dca4c8',objects:[
+  {id:'door',n:'工作室門口',kind:'door',x:450,y:430,r:70,actions:['exit']},
+  {id:'craft',n:'紙偶工作桌',kind:'table',x:360,y:210,r:82,actions:['craft']},
+  {id:'paint',n:'彩色畫架',kind:'book',x:650,y:220,r:72,actions:['draw']},
+  {id:'petMat',n:'寵物陪伴墊',kind:'petBed',x:740,y:330,r:68,actions:['pet','napPet']}
+ ]}
+};
 let townData=lsGet('pmgTown',{coins:0,owned:[]});
+townData.owned=[...new Set(townData.owned||[])];
+let townLife=Object.assign({food:6,mood:50,clean:55,energy:60,last:'歡迎回到公主小鎮'},lsGet('pmgTownLife',{}));
+function townNumber(v,fallback){v=Number(v);return Number.isFinite(v)?v:fallback;}
+townLife.food=Math.max(0,Math.round(townNumber(townLife.food,6)));
+townLife.mood=clamp(townNumber(townLife.mood,50),0,100);
+townLife.clean=clamp(townNumber(townLife.clean,55),0,100);
+townLife.energy=clamp(townNumber(townLife.energy,60),0,100);
+townLife.last=String(townLife.last||'歡迎回到公主小鎮');
 const tcv=document.getElementById('townCv'), tctx=tcv.getContext('2d');
+const townTouchKeys=new Set();
+let townInterior=null,townActionSig='',townHudSig='',townNearby=null;
+const townCam={x:0,y:0};
+const townPlayer={x:520,y:500,vx:0,vy:0,dir:1,walk:0,actT:0,actText:''};
+let townPets=[];
+function saveTown(){lsSet('pmgTown',townData);lsSet('pmgTownLife',townLife);}
+function townHas(id){return townData.owned.includes(id);}
+function townBuildingUnlocked(b){return b.public||townHas(b.id);}
 function renderShop(){
   document.getElementById('townCoins').textContent=townData.coins;
   const bar=document.getElementById('shopBar');bar.innerHTML='';
+  const foodBtn=document.createElement('button');
+  foodBtn.className='shopBtn'+(townData.coins<10?' poor':'');
+  foodBtn.textContent='寵物點心包 🪙10（+3）';
+  foodBtn.onclick=()=>{if(townData.coins<10)return;townData.coins-=10;townLife.food+=3;townSay('買了寵物點心包，食物 +3','buy');renderShop();};
+  bar.appendChild(foodBtn);
   SHOP.forEach(it=>{
     const b=document.createElement('button');
-    const owned=townData.owned.includes(it.id);
+    const owned=townHas(it.id);
     b.className='shopBtn'+(owned?' owned':townData.coins<it.p?' poor':'');
     b.textContent=owned?('✔ '+it.n):(it.n+' 🪙'+it.p);
     b.onclick=()=>{
       if(owned||townData.coins<it.p)return;
       townData.coins-=it.p;townData.owned.push(it.id);
-      lsSet('pmgTown',townData);initAudio();sfx.buy();renderShop();
+      townSay('完成 '+it.n+'，地圖變更豐富了','buy');
+      renderShop();
     };
     bar.appendChild(b);
   });
+  updateTownHud();
 }
-function townHas(id){return townData.owned.includes(id);}
-function drawTown(){
-  const c=tctx, TW=900, TH=320;
-  const g=c.createLinearGradient(0,0,0,TH);
-  g.addColorStop(0,'#8fd0f0');g.addColorStop(.7,'#cfeeff');c.fillStyle=g;c.fillRect(0,0,TW,TH);
-  c.fillStyle='#ffe97a';c.fillRect(TW-90,20,40,40);
-  c.fillStyle='rgba(255,255,255,.9)';
-  for(let i=0;i<5;i++){const sx=(i*210+frame*.15)%(TW+160)-80;c.fillRect(sx,30+i*22,80,14);c.fillRect(sx+12,20+i*22,50,12);}
-  c.fillStyle='#7cc25e';c.fillRect(0,210,TW,110);
-  c.fillStyle='#6aab50';for(let i=0;i<30;i++)c.fillRect((i*73)%TW,212+(i*37)%100,6,4);
-  c.fillStyle='#d8b078';c.fillRect(0,258,TW,26);   // 小路
-  c.fillStyle='#c69a5e';for(let i=0;i<22;i++)c.fillRect(i*42,258,30,26);
-  // —— 建築與裝飾 ——
-  if(townHas('house')){c.fillStyle='#9a6a3a';c.fillRect(80,150,110,70);
-    c.fillStyle='#7a4a22';c.beginPath();c.moveTo(70,152);c.lineTo(135,110);c.lineTo(200,152);c.fill();
-    c.fillStyle='#5a3a1a';c.fillRect(120,180,28,40);c.fillStyle='#ffe9a8';c.fillRect(95,165,20,18);c.fillRect(155,165,20,18);}
-  if(townHas('bakery')){c.fillStyle='#e8b890';c.fillRect(400,150,120,70);
-    c.fillStyle='#c08858';c.fillRect(400,142,120,12);
-    for(let i=0;i<6;i++){c.fillStyle=i%2?'#ff8fb0':'#fff';c.fillRect(400+i*20,142,20,12);}
-    c.fillStyle='#7a4a22';c.fillRect(445,180,30,40);
-    c.font='16px sans-serif';c.fillText('🍞',410,175);c.fillText('🧁',490,175);}
-  if(townHas('castle')){c.fillStyle='#b8b8c8';c.fillRect(680,120,140,100);
-    c.fillRect(665,100,30,120);c.fillRect(805,100,30,120);
-    c.fillStyle='#8888a0';c.fillRect(665,92,30,10);c.fillRect(805,92,30,10);c.fillRect(680,112,140,10);
-    c.fillStyle='#ff6f9e';c.beginPath();c.moveTo(680,92);c.lineTo(695,68);c.lineTo(710,92);c.fill();
-    c.beginPath();c.moveTo(790,92);c.lineTo(805,68);c.lineTo(820,92);c.fill();
-    c.fillStyle='#5a3a6a';c.fillRect(730,170,40,50);
-    c.font='14px sans-serif';c.fillText('👑',742,160);}
-  if(townHas('tree')){c.fillStyle='#7a4a22';c.fillRect(296,180,12,40);
-    c.fillStyle='#4f9430';c.fillRect(270,140,64,50);c.fillRect(282,126,40,24);
-    c.fillStyle='#e84545';c.fillRect(285,150,8,8);c.fillRect(312,160,8,8);c.fillRect(298,172,8,8);}
-  if(townHas('swing')){c.strokeStyle='#7a4a22';c.lineWidth=5;
-    c.beginPath();c.moveTo(560,160);c.lineTo(575,220);c.moveTo(640,160);c.lineTo(625,220);c.stroke();
-    c.fillStyle='#7a4a22';c.fillRect(555,155,90,8);
-    const sw=Math.sin(frame/20)*14;
-    c.strokeStyle='#999';c.lineWidth=2;
-    c.beginPath();c.moveTo(590,163);c.lineTo(590+sw,200);c.moveTo(612,163);c.lineTo(612+sw,200);c.stroke();
-    c.fillStyle='#e8b840';c.fillRect(584+sw,200,34,7);}
-  if(townHas('pond')){c.fillStyle='#5bb8e8';c.fillRect(700,238,110,34);c.fillRect(712,232,86,46);
-    c.fillStyle='#8fd4f5';const wv=Math.sin(frame/15)*4;c.fillRect(720+wv,245,30,4);c.fillRect(760-wv,258,26,4);
-    c.font='12px sans-serif';c.fillText('🦆',730+wv*2,252);}
-  if(townHas('fountain')){c.fillStyle='#aaa';c.fillRect(330,240,80,18);c.fillStyle='#888';c.fillRect(338,246,64,8);
-    c.fillStyle='#5bb8e8';c.fillRect(340,242,60,8);
-    c.fillStyle='#9fdcf8';const fh=12+Math.sin(frame/8)*6;
-    c.fillRect(366,242-fh,8,fh);c.fillRect(358,242-fh*.6,4,fh*.6);c.fillRect(378,242-fh*.6,4,fh*.6);}
-  if(townHas('flower')){for(let i=0;i<6;i++){
-    c.fillStyle=['#ff6f9e','#ffd84d','#b08fe8'][i%3];c.fillRect(120+i*18,242,8,8);
-    c.fillStyle='#4f9430';c.fillRect(122+i*18,250,4,8);}}
-  if(townHas('mailbox')){c.fillStyle='#e84545';c.fillRect(50,228,24,16);c.fillStyle='#7a4a22';c.fillRect(58,244,6,18);
-    c.fillStyle='#fff';c.fillRect(54,232,10,8);}
-  if(townHas('lamp')){c.fillStyle='#555';c.fillRect(230,200,6,60);
-    c.fillStyle='#ffe97a';c.globalAlpha=.5+.3*Math.sin(frame/10);c.fillRect(222,188,22,16);c.globalAlpha=1;
-    c.fillStyle='#333';c.fillRect(220,184,26,6);}
-  // —— 居民：公主與寵物 ——
-  function strollX(seed,range,off){return off+((Math.sin(frame/120+seed)+1)/2)*range;}
-  c.save();c.translate(strollX(1,200,180),212);c.scale(.8,.8);
-  // 借用主畫布的公主繪製到 town canvas：改用簡易複製
-  c.restore();
-  drawTownPrincess(c,strollX(1,220,160),216,'#5bc8e8','#3a9fc0');
-  drawTownPrincess(c,strollX(4,220,500),216,'#5b8de8','#3a64c0');
-  const dex=[...new Set([...lsGet('pmgDex1',[]),...lsGet('pmgDex2',[])])];
-  dex.forEach((mi,k)=>{
-    const m=MONSTERS[mi];if(!m)return;
-    const px=strollX(mi*2+2,640,90+k*30)|0, py=288+Math.sin(frame/12+mi)*3;
-    c.fillStyle=m.colorA;c.fillRect(px-8,py-6,16,12);
-    c.fillStyle=m.colorB;c.fillRect(px-4,py-1,8,6);
-    c.fillStyle=m.colorA;c.fillRect(px-6,py-12,3,7);c.fillRect(px+3,py-12,3,7);
-    c.fillStyle='#222';c.fillRect(px-3,py-3,2,2);c.fillRect(px+2,py-3,2,2);
+function townPetIds(){
+  const ids=[...new Set([...lsGet('pmgDex1',[]),...lsGet('pmgDex2',[])])];
+  return ids.length?ids.slice(0,5):[0];
+}
+function ensureTownPets(){
+  const ids=townPetIds();
+  townPets=ids.map((mi,i)=>{
+    const old=townPets[i]||{};
+    const bed={x:320+i*58,y:1025+(i%2)*36};
+    return {mi,x:old.x||bed.x,y:old.y||bed.y,bedX:bed.x,bedY:bed.y,seed:i*1.7+mi};
   });
-  if(dex.length===0&&townData.owned.length===0){
-    c.fillStyle='#333';c.font='bold 16px "Microsoft JhengHei",sans-serif';c.textAlign='center';
-    c.fillText('去冒險賺金幣、收服寵物，回來蓋出妳的夢幻小鎮吧！',TW/2,300);c.textAlign='left';}
 }
-function drawTownPrincess(c,x,y,dress,dress2){
-  x|=0;
-  c.fillStyle='#7c3c10';c.fillRect(x+3,y+34,6,4);c.fillRect(x+12,y+34,6,4);
-  c.fillStyle=dress2;c.fillRect(x-1,y+27,23,7);
-  c.fillStyle=dress;c.fillRect(x+1,y+20,19,8);c.fillRect(x+4,y+15,13,6);
-  c.fillStyle='#f5e6a8';c.fillRect(x+2,y+1,17,14);
-  c.fillStyle='#ffe3c2';c.fillRect(x+4,y+4,12,9);
-  c.fillStyle='#f5e6a8';c.fillRect(x+2,y+1,17,4);
-  c.fillStyle='#23314f';c.fillRect(x+7,y+7,2,3);c.fillRect(x+12,y+7,2,3);
-  c.fillStyle='#ffd21f';c.fillRect(x+5,y-3,11,4);
+function updateTownHud(){
+  const place=townInterior?TOWN_INTERIORS[townInterior].n:'小鎮廣場';
+  const placeText=place+'　'+(townInterior?'室內':'室外地圖');
+  const statusText='食物 '+townLife.food+'｜心情 '+Math.round(townLife.mood)+'｜清潔 '+Math.round(townLife.clean);
+  const sig=townData.coins+'|'+placeText+'|'+statusText;
+  if(sig===townHudSig)return;
+  townHudSig=sig;
+  document.getElementById('townCoins').textContent=townData.coins;
+  document.getElementById('townPlace').textContent=placeText;
+  document.getElementById('townStatus').textContent=statusText;
 }
+function townSay(text,sound){
+  townLife.last=text;
+  townPlayer.actT=130;townPlayer.actText=text;
+  townLife.mood=Math.min(100,Math.max(0,townLife.mood));
+  townLife.clean=Math.min(100,Math.max(0,townLife.clean));
+  townLife.energy=Math.min(100,Math.max(0,townLife.energy));
+  saveTown();townHudSig='';updateTownHud();townActionSig='';
+  if(sound==='buy')sfx.buy();else if(sound==='pet')sfx.capture();else if(sound==='eat')sfx.coin();else sfx.shield();
+}
+function getTownActionSpec(id,target){
+  const specs={
+    exit:{label:'🚪 出門',run:()=>exitTownInterior()},
+    enter:{label:'🚪 進入'+target.n,run:()=>enterTownInterior(target.inside)},
+    decorate:{label:'🔨 裝潢 '+target.n,run:()=>buyTownBuilding(target.id)},
+    brush:{label:'🪥 刷牙',run:()=>{townLife.clean+=12;townSay('刷牙完成，牙齒亮晶晶','');}},
+    wash:{label:'🧼 洗臉',run:()=>{townLife.clean+=10;townSay('洗完臉，好清爽','');}},
+    toilet:{label:'🚽 上廁所',run:()=>{townLife.clean+=5;townSay('上完廁所，記得洗手','');}},
+    eat:{label:'🍽️ 吃飯',run:()=>{townLife.energy+=14;townLife.mood+=5;townSay('好好吃飯，體力回來了','eat');}},
+    tea:{label:'🍵 喝下午茶',run:()=>{townLife.energy+=8;townLife.mood+=8;townSay('喝了皇家下午茶','eat');}},
+    coffee:{label:'☕ 喝咖啡',run:()=>{townLife.energy+=12;townLife.mood+=6;townSay('喝了香香的咖啡','eat');}},
+    cake:{label:'🍰 吃蛋糕',run:()=>{townLife.energy+=9;townLife.mood+=10;townSay('蛋糕讓心情變好了','eat');}},
+    bread:{label:'🥐 吃麵包',run:()=>{townLife.energy+=10;townLife.food+=1;townSay('吃了剛出爐麵包，還帶走一份寵物點心','eat');}},
+    bake:{label:'🍞 烤麵包',run:()=>{townLife.food+=2;townLife.mood+=6;townSay('烤好小麵包，寵物食物 +2','eat');}},
+    dessert:{label:'🧁 吃甜點',run:()=>{townLife.mood+=10;townSay('甜點時間超幸福','eat');}},
+    juice:{label:'🧃 喝果汁',run:()=>{townLife.energy+=8;townSay('喝了水果汁','eat');}},
+    snack:{label:'🍿 吃點心',run:()=>{townLife.energy+=6;townLife.mood+=5;townSay('玩遊戲配點心最開心','eat');}},
+    bath:{label:'🛁 泡澡',run:()=>{townLife.clean+=22;townLife.energy+=6;townSay('泡泡澡完成，整個人香香的','');}},
+    rest:{label:'🛋️ 休息一下',run:()=>{townLife.energy+=14;townLife.mood+=4;townSay('坐下來休息一下','');}},
+    read:{label:'📖 看故事書',run:()=>{townLife.mood+=8;townSay('讀了一本新的故事書','');}},
+    draw:{label:'🎨 畫圖',run:()=>{townLife.mood+=9;townSay('畫了一張新作品','');}},
+    craft:{label:'✂️ 做紙偶',run:()=>{townLife.mood+=10;townSay('完成新的紙偶場景','');}},
+    playGame:{label:'🎮 玩電玩',run:()=>{townLife.mood+=12;townLife.energy-=4;townSay('玩了一場小遊戲','');}},
+    boardGame:{label:'🎲 玩桌遊',run:()=>{townLife.mood+=9;townSay('桌遊時間很好玩','');}},
+    buyFood:{label:'🛒 補寵物食物',run:()=>{townLife.food+=2;townSay('補了寵物食物 +2','buy');}},
+    feed:{label:'🥣 餵寵物',run:()=>feedTownPet()},
+    pet:{label:'🤲 撫摸寵物',run:()=>{townLife.mood+=9;townSay('寵物被摸摸，開心地轉圈','pet');}},
+    napPet:{label:'🛏️ 讓寵物回窩',run:()=>{townLife.mood+=4;townPets.forEach(p=>{p.x=p.bedX;p.y=p.bedY;});townSay('寵物回到自己的窩休息','pet');}},
+    playPet:{label:'🧸 陪寵物玩',run:()=>{townLife.mood+=12;townSay('和寵物玩球，心情大提升','pet');}}
+  };
+  return specs[id];
+}
+function buyTownBuilding(id){
+  const item=SHOP.find(s=>s.id===id);
+  if(!item||townHas(id))return;
+  if(townData.coins<item.p){townSay('小鎮基金還不夠，先去冒險賺金幣吧','');return;}
+  townData.coins-=item.p;townData.owned.push(id);townSay('完成 '+item.n+'！','buy');renderShop();
+}
+function feedTownPet(){
+  if(townLife.food<=0){townSay('食物不夠，去麵包店或商店補一點吧','');return;}
+  townLife.food--;townLife.mood+=14;
+  townSay('餵寵物吃了小點心，牠超開心','pet');
+}
+function enterTownInterior(id){
+  if(!TOWN_INTERIORS[id])return;
+  townInterior=id;townPlayer.x=450;townPlayer.y=390;townActionSig='';
+  townSay('進入 '+TOWN_INTERIORS[id].n,'');
+}
+function exitTownInterior(){
+  const b=TOWN_BUILDINGS.find(x=>x.inside===townInterior)||TOWN_BUILDINGS[0];
+  townInterior=null;townPlayer.x=b.x+b.w/2;townPlayer.y=b.y+b.h+46;townActionSig='';
+  townSay('回到小鎮廣場','');
+}
+function townDist(a,b,x,y){return Math.hypot(a-x,b-y);}
+function getTownObjects(){
+  if(townInterior){
+    return TOWN_INTERIORS[townInterior].objects.map(o=>Object.assign({},o,{actions:o.actions.map(a=>getTownActionSpec(a,o)).filter(Boolean)}));
+  }
+  const objs=[];
+  TOWN_BUILDINGS.forEach(b=>{
+    const available=townBuildingUnlocked(b);
+    const actions=[];
+    if(available)actions.push(getTownActionSpec('enter',b));
+    if(!townHas(b.id))actions.push(getTownActionSpec('decorate',b));
+    objs.push({id:'building-'+b.id,n:b.n,x:b.x+b.w/2,y:b.y+b.h+24,r:82,kind:'building',building:b,actions:actions.filter(Boolean)});
+  });
+  objs.push({id:'fountain',n:'噴水池',x:950,y:585,r:70,kind:'fountain',actions:[getTownActionSpec('wash',{n:'噴水池'})]});
+  objs.push({id:'picnic',n:'野餐桌',x:1260,y:600,r:76,kind:'table',actions:[getTownActionSpec('eat',{n:'野餐桌'}),getTownActionSpec('buyFood',{n:'野餐桌'})]});
+  townPets.forEach((p,i)=>objs.push({id:'pet-'+i,n:(MONSTERS[p.mi]?.name||'小寵物'),x:p.x,y:p.y,r:58,kind:'pet',actions:['feed','pet','napPet'].map(a=>getTownActionSpec(a,p)).filter(Boolean)}));
+  townPets.forEach((p,i)=>objs.push({id:'petBed-'+i,n:'寵物窩',x:p.bedX,y:p.bedY,r:54,kind:'petBed',actions:['feed','pet','napPet'].map(a=>getTownActionSpec(a,p)).filter(Boolean)}));
+  return objs;
+}
+function findTownNearby(){
+  let best=null,bd=999;
+  getTownObjects().forEach((o,idx)=>{
+    const d=townDist(townPlayer.x,townPlayer.y,o.x,o.y);
+    const score=d+(o.kind==='pet'?8:0)+(o.kind==='petBed'?5:0)+idx*.001;
+    if(d<o.r&&score<bd){best=o;bd=score;}
+  });
+  return best;
+}
+function renderTownActions(target){
+  const bar=document.getElementById('townActions');
+  const sig=target?(target.id+'|'+target.actions.map(a=>a.label).join(',')):'none';
+  if(sig===townActionSig)return;
+  townActionSig=sig;bar.innerHTML='';
+  if(!target||!target.actions.length){const s=document.createElement('span');s.className='townHint';s.textContent=townLife.last||'靠近物件後可以互動';bar.appendChild(s);return;}
+  target.actions.slice(0,4).forEach(a=>{
+    const b=document.createElement('button');b.className='townActionBtn';b.textContent=a.label;
+    b.onclick=()=>{initAudio();a.run();renderTownActions(findTownNearby());};
+    bar.appendChild(b);
+  });
+}
+function updateTown(){
+  ensureTownPets();
+  const left=keys.has('ArrowLeft')||keys.has('KeyA')||townTouchKeys.has('ArrowLeft')||townTouchKeys.has('KeyA');
+  const right=keys.has('ArrowRight')||keys.has('KeyD')||townTouchKeys.has('ArrowRight')||townTouchKeys.has('KeyD');
+  const up=keys.has('ArrowUp')||keys.has('KeyW')||townTouchKeys.has('ArrowUp')||townTouchKeys.has('KeyW');
+  const down=keys.has('ArrowDown')||keys.has('KeyS')||townTouchKeys.has('ArrowDown')||townTouchKeys.has('KeyS');
+  let dx=(right?1:0)-(left?1:0),dy=(down?1:0)-(up?1:0);
+  const len=Math.hypot(dx,dy)||1,spd=townInterior?3.1:3.6;
+  townPlayer.vx=dx/len*spd;townPlayer.vy=dy/len*spd;
+  if(dx||dy){townPlayer.x+=townPlayer.vx;townPlayer.y+=townPlayer.vy;townPlayer.walk+=.22;townPlayer.dir=dx<0?-1:dx>0?1:townPlayer.dir;}
+  const maxX=townInterior?TOWN_VIEW_W-38:TOWN_WORLD_W-38,maxY=townInterior?TOWN_VIEW_H-40:TOWN_WORLD_H-38;
+  townPlayer.x=clamp(townPlayer.x,38,maxX);townPlayer.y=clamp(townPlayer.y,78,maxY);
+  townPets.forEach((p,i)=>{
+    const tx=townInterior?townPlayer.x-48-i*18:p.bedX+(Math.sin(frame/60+p.seed)*16);
+    const ty=townInterior?townPlayer.y+34+i*8:p.bedY+(Math.cos(frame/75+p.seed)*10);
+    if(townInterior||townDist(townPlayer.x,townPlayer.y,p.x,p.y)<260){p.x+=(tx-p.x)*.045;p.y+=(ty-p.y)*.045;}
+  });
+  if(!townInterior){
+    townCam.x=clamp(townPlayer.x-TOWN_VIEW_W/2,0,TOWN_WORLD_W-TOWN_VIEW_W);
+    townCam.y=clamp(townPlayer.y-TOWN_VIEW_H/2,0,TOWN_WORLD_H-TOWN_VIEW_H);
+  }else{townCam.x=0;townCam.y=0;}
+  if(townPlayer.actT>0)townPlayer.actT--;
+  townNearby=findTownNearby();renderTownActions(townNearby);updateTownHud();
+}
+function drawRoundRect(c,x,y,w,h,r,fill,stroke){
+  c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.quadraticCurveTo(x+w,y,x+w,y+r);c.lineTo(x+w,y+h-r);c.quadraticCurveTo(x+w,y+h,x+w-r,y+h);c.lineTo(x+r,y+h);c.quadraticCurveTo(x,y+h,x,y+h-r);c.lineTo(x,y+r);c.quadraticCurveTo(x,y,x+r,y);c.closePath();
+  if(fill){c.fillStyle=fill;c.fill();}if(stroke){c.strokeStyle=stroke;c.lineWidth=3;c.stroke();}
+}
+function drawTown(){
+  const c=tctx;
+  c.clearRect(0,0,TOWN_VIEW_W,TOWN_VIEW_H);
+  if(townInterior)drawTownInterior(c);
+  else drawTownExterior(c);
+}
+function drawTownExterior(c){
+  const g=c.createLinearGradient(0,0,0,TOWN_VIEW_H);
+  g.addColorStop(0,'#95d4f1');g.addColorStop(.65,'#cdeeff');g.addColorStop(1,'#bce9b5');c.fillStyle=g;c.fillRect(0,0,TOWN_VIEW_W,TOWN_VIEW_H);
+  c.save();c.translate(-townCam.x,-townCam.y);
+  c.fillStyle='#77bf62';c.fillRect(0,0,TOWN_WORLD_W,TOWN_WORLD_H);
+  c.fillStyle='#6daf56';for(let i=0;i<260;i++)c.fillRect((i*97)%TOWN_WORLD_W,(i*53)%TOWN_WORLD_H,8,4);
+  c.fillStyle='#d8b078';drawRoad(c,120,500,1960,52);drawRoad(c,990,140,52,1060);drawRoad(c,250,965,1600,44);
+  c.fillStyle='#5bb8e8';drawRoundRect(c,1170,390,360,190,70,'#58bfe9','#d6f8ff');drawRoundRect(c,90,1080,300,120,45,'#69c7e8','#d6f8ff');
+  TOWN_BUILDINGS.forEach(b=>drawTownBuilding(c,b));
+  drawTownDecorations(c);
+  townPets.forEach((p,i)=>{drawTownPetBed(c,p.bedX,p.bedY,i);drawTownPet(c,p.x,p.y,p.mi,.95);});
+  drawTownPlayer(c,townPlayer.x,townPlayer.y);
+  if(townPlayer.actT>0)drawTownBubble(c,townPlayer.x,townPlayer.y-54,townPlayer.actText);
+  c.restore();
+}
+function drawRoad(c,x,y,w,h){drawRoundRect(c,x,y,w,h,24,'#d9bd87');c.fillStyle='rgba(255,255,255,.22)';for(let i=x+20;i<x+w;i+=80)c.fillRect(i,y+h/2-3,38,6);}
+function drawTownBuilding(c,b){
+  const owned=townHas(b.id),available=townBuildingUnlocked(b);
+  const body=owned||available?b.color:'#c9c0b7',roof=owned||available?b.roof:'#8d8278';
+  drawRoundRect(c,b.x,b.y,b.w,b.h,14,body,'rgba(60,50,40,.45)');
+  c.fillStyle=roof;c.beginPath();c.moveTo(b.x-10,b.y+12);c.lineTo(b.x+b.w/2,b.y-45);c.lineTo(b.x+b.w+10,b.y+12);c.closePath();c.fill();
+  c.fillStyle='#5a3a1a';drawRoundRect(c,b.x+b.w/2-18,b.y+b.h-42,36,42,7,'#6b4524');
+  c.fillStyle='#fff3bf';c.fillRect(b.x+24,b.y+38,30,26);c.fillRect(b.x+b.w-54,b.y+38,30,26);
+  c.font='bold 14px "Microsoft JhengHei",sans-serif';c.textAlign='center';c.fillStyle='#26343b';c.fillText(b.n,b.x+b.w/2,b.y+b.h+24);
+  if(!owned&&b.public){c.font='12px sans-serif';c.fillStyle='#6a4e18';c.fillText('可進入・可裝潢',b.x+b.w/2,b.y+b.h+42);}
+  else if(!available){c.font='12px sans-serif';c.fillStyle='#6a4e18';c.fillText('待裝潢',b.x+b.w/2,b.y+b.h+42);}
+  c.textAlign='left';
+}
+function drawTownDecorations(c){
+  if(townHas('fountain')){drawRoundRect(c,910,545,92,70,24,'#bfc4ca');drawRoundRect(c,925,560,62,34,18,'#56bde8');}
+  else drawRoundRect(c,930,565,54,34,16,'#74c9e8');
+  if(townHas('flower'))for(let i=0;i<16;i++){c.fillStyle=['#ff6f9e','#ffd84d','#b08fe8','#7ae582'][i%4];c.fillRect(600+i*24,520+(i%3)*14,8,8);}
+  if(townHas('tree'))for(let i=0;i<7;i++)drawTownTree(c,150+i*210,760+(i%2)*55);
+  if(townHas('swing')){c.strokeStyle='#7a4a22';c.lineWidth=6;c.beginPath();c.moveTo(720,970);c.lineTo(750,1080);c.moveTo(830,970);c.lineTo(800,1080);c.stroke();c.fillStyle='#7a4a22';c.fillRect(710,965,130,10);c.fillStyle='#f0c35a';c.fillRect(752+Math.sin(frame/20)*12,1042,54,10);}
+  if(townHas('mailbox'))drawRoundRect(c,130,430,36,26,6,'#e84545');
+  if(townHas('lamp'))for(let i=0;i<8;i++){c.fillStyle='#4e5960';c.fillRect(260+i*210,470,8,55);c.fillStyle='#ffe58a';c.globalAlpha=.6+.25*Math.sin(frame/12+i);c.fillRect(250+i*210,454,28,20);c.globalAlpha=1;}
+  c.font='bold 18px sans-serif';c.fillStyle='#fff8c9';c.fillText('☀',1940,95);
+}
+function drawTownTree(c,x,y){c.fillStyle='#7a4a22';c.fillRect(x-8,y,16,48);c.fillStyle='#4f9430';drawRoundRect(c,x-42,y-48,84,62,26,'#4f9430');}
+function drawTownInterior(c){
+  const room=TOWN_INTERIORS[townInterior];
+  c.fillStyle=room.bg;c.fillRect(0,0,TOWN_VIEW_W,TOWN_VIEW_H);
+  c.fillStyle=room.floor;c.fillRect(0,120,TOWN_VIEW_W,TOWN_VIEW_H-120);
+  c.fillStyle='rgba(255,255,255,.22)';for(let x=0;x<TOWN_VIEW_W;x+=60)c.fillRect(x,122,28,TOWN_VIEW_H-122);
+  c.font='bold 22px "Microsoft JhengHei",sans-serif';c.fillStyle='#4a3a2a';c.fillText(room.n,28,42);
+  room.objects.forEach(o=>drawTownObject(c,o));
+  townPets.forEach((p,i)=>drawTownPet(c,p.x,p.y,p.mi,.92));
+  drawTownPlayer(c,townPlayer.x,townPlayer.y);
+  if(townPlayer.actT>0)drawTownBubble(c,townPlayer.x,townPlayer.y-54,townPlayer.actText);
+}
+function drawTownObject(c,o){
+  if(o.kind==='door'){drawRoundRect(c,o.x-36,o.y-18,72,36,8,'#7a4a22');}
+  else if(o.kind==='sink'){drawRoundRect(c,o.x-38,o.y-24,76,48,12,'#f7fbff','#7bbbd1');c.fillStyle='#68c7e8';c.fillRect(o.x-16,o.y-2,32,8);}
+  else if(o.kind==='toilet'){drawRoundRect(c,o.x-30,o.y-30,60,58,18,'#f8fbff','#8aa');c.fillStyle='#8fd4f5';c.fillRect(o.x-15,o.y-6,30,12);}
+  else if(o.kind==='table'){drawRoundRect(c,o.x-58,o.y-35,116,70,16,'#c9864f','#8a5b33');c.fillStyle='#fff0bf';c.fillRect(o.x-20,o.y-16,40,26);}
+  else if(o.kind==='counter'){drawRoundRect(c,o.x-72,o.y-30,144,60,12,'#d99662','#8a5b33');c.fillStyle='#fff2c2';for(let i=0;i<4;i++)c.fillRect(o.x-50+i*32,o.y-12,20,18);}
+  else if(o.kind==='oven'){drawRoundRect(c,o.x-42,o.y-36,84,72,10,'#6b6f78');c.fillStyle='#ffb45d';c.fillRect(o.x-25,o.y-12,50,25);}
+  else if(o.kind==='arcade'){drawRoundRect(c,o.x-34,o.y-52,68,104,10,'#4d5fb8');c.fillStyle='#99e2ff';c.fillRect(o.x-22,o.y-38,44,32);c.fillStyle='#ffd84d';c.fillRect(o.x-18,o.y+10,36,8);}
+  else if(o.kind==='sofa'){drawRoundRect(c,o.x-58,o.y-28,116,56,20,'#b88be0');}
+  else if(o.kind==='book'){drawRoundRect(c,o.x-50,o.y-42,100,84,8,'#8a623a');c.fillStyle='#ffd84d';for(let i=0;i<4;i++)c.fillRect(o.x-38+i*20,o.y-28,12,56);}
+  else if(o.kind==='bath'){drawRoundRect(c,o.x-80,o.y-42,160,84,38,'#f7fbff','#78cde8');c.fillStyle='#65c8ed';drawRoundRect(c,o.x-65,o.y-25,130,50,25,'#65c8ed');}
+  else if(o.kind==='petBed'){drawTownPetBed(c,o.x,o.y,1);}
+  else if(o.kind==='petBowl'){c.fillStyle='#d96b7d';drawRoundRect(c,o.x-30,o.y-18,60,36,18,'#d96b7d');c.fillStyle='#ffe58a';c.fillRect(o.x-13,o.y-5,26,10);}
+  else if(o.kind==='toy'){c.fillStyle='#ffd84d';c.beginPath();c.arc(o.x,o.y,25,0,Math.PI*2);c.fill();c.fillStyle='#ff6f9e';c.fillRect(o.x-4,o.y-23,8,46);}
+  c.font='12px "Microsoft JhengHei",sans-serif';c.fillStyle='#4a3a2a';c.textAlign='center';c.fillText(o.n,o.x,o.y+o.r*.55);c.textAlign='left';
+}
+function drawTownPetBed(c,x,y,i){drawRoundRect(c,x-34,y-20,68,40,18,['#ffd5e5','#d8c7ff','#d5f2ff'][i%3],'#fff6');c.fillStyle='#fff6';c.fillRect(x-20,y-8,40,12);}
+function drawTownPlayer(c,x,y){
+  const bob=Math.sin(townPlayer.walk)*4;
+  c.save();c.translate(x,y+bob*.15);c.scale(townPlayer.dir,1);
+  c.fillStyle='#7c3c10';c.fillRect(-14,18+Math.max(0,bob),9,8);c.fillRect(5,18+Math.max(0,-bob),9,8);
+  c.fillStyle='#3a9fc0';c.fillRect(-18,-2,36,22);
+  c.fillStyle='#5bc8e8';c.fillRect(-14,-25,28,30);c.fillRect(-22,-6,44,18);
+  c.fillStyle='#ffe3c2';c.fillRect(-14,-52,28,25);
+  c.fillStyle='#f5d05d';c.fillRect(-17,-60,34,16);c.fillRect(-20,-48,8,16);c.fillRect(12,-48,8,16);
+  c.fillStyle='#23314f';c.fillRect(-7,-43,4,5);c.fillRect(6,-43,4,5);
+  c.fillStyle='#ffd21f';c.fillRect(-13,-67,26,7);for(let i=-1;i<=1;i++)c.fillRect(i*9-3,-76-Math.abs(i)*2,6,10);
+  c.restore();
+}
+function drawTownPet(c,x,y,mi,scale){
+  const m=MONSTERS[mi]||MONSTERS[0];const bob=Math.sin(frame/15+mi)*3;
+  c.save();c.translate(x,y+bob);c.scale(scale,scale);
+  c.fillStyle=m.colorA;drawRoundRect(c,-16,-13,32,26,12,m.colorA);
+  c.fillStyle=m.colorB;drawRoundRect(c,-9,-3,18,13,7,m.colorB);
+  c.fillStyle=m.colorA;c.fillRect(-12,-26,7,14);c.fillRect(5,-26,7,14);
+  c.fillStyle=m.colorC;c.fillRect(-10,-22,3,8);c.fillRect(7,-22,3,8);
+  c.fillStyle='#222';c.fillRect(-6,-8,3,4);c.fillRect(4,-8,3,4);
+  c.restore();
+}
+function drawTownBubble(c,x,y,text){
+  const w=Math.min(320,Math.max(120,text.length*13));
+  drawRoundRect(c,x-w/2,y-34,w,30,10,'rgba(20,22,32,.86)','#ffe58a');
+  c.font='bold 13px "Microsoft JhengHei",sans-serif';c.fillStyle='#fff';c.textAlign='center';c.fillText(text,x,y-14);c.textAlign='left';
+}
+function townPrimaryAction(){if(townNearby&&townNearby.actions[0]){initAudio();townNearby.actions[0].run();renderTownActions(findTownNearby());}}
 //==================== 主迴圈 ====================
 function update(){
   frame++;
@@ -1229,7 +1538,7 @@ function update(){
     texts=texts.filter(tx=>tx.life>0);
   }
   draw();
-  if(townOpen)drawTown();
+  if(townOpen){updateTown();drawTown();}
   requestAnimationFrame(update);
 }
 //==================== 開始／結束 ====================
@@ -1330,11 +1639,14 @@ document.getElementById('btnAgain').onclick=()=>{
   document.getElementById('endScr').classList.add('hidden');
   resetGame();
 };
-function openTown(){initAudio();renderShop();townOpen=true;document.getElementById('townScr').classList.remove('hidden');}
+function openTown(){
+  initAudio();stopBGM();keys.clear();townTouchKeys.clear();ensureTownPets();renderShop();updateTownHud();
+  townActionSig='';townOpen=true;document.getElementById('townScr').classList.remove('hidden');
+}
 document.getElementById('btnTown').onclick=openTown;
 document.getElementById('btnTown2').onclick=openTown;
 document.getElementById('btnTownBack').onclick=()=>{
-  townOpen=false;document.getElementById('townScr').classList.add('hidden');};
+  townOpen=false;townTouchKeys.clear();document.getElementById('townScr').classList.add('hidden');};
 //==================== 手機觸控 ====================
 function bindTouch(id,down,up){
   const el=document.getElementById(id);
@@ -1352,6 +1664,18 @@ bindTouch('t2l',()=>keys.add('ArrowLeft'),()=>keys.delete('ArrowLeft'));
 bindTouch('t2r',()=>keys.add('ArrowRight'),()=>keys.delete('ArrowRight'));
 bindTouch('t2j',()=>{p2.jumpBuf=7;},()=>{if(p2.vy<-4)p2.vy*=.55;});
 bindTouch('t2z',()=>useItem(p2));
+document.querySelectorAll('[data-town-key]').forEach(btn=>{
+  const code=btn.dataset.townKey;
+  btn.addEventListener('pointerdown',e=>{e.preventDefault();initAudio();townTouchKeys.add(code);try{btn.setPointerCapture(e.pointerId);}catch(err){};});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>btn.addEventListener(ev,e=>{e.preventDefault();townTouchKeys.delete(code);}));
+  btn.addEventListener('contextmenu',e=>e.preventDefault());
+});
+document.getElementById('townQuick').addEventListener('pointerdown',e=>{e.preventDefault();townPrimaryAction();});
+window.addEventListener('keydown',e=>{
+  if(!townOpen)return;
+  if(['Enter','Space','KeyE'].includes(e.code)){e.preventDefault();townPrimaryAction();}
+  if(e.code==='Escape'&&townInterior){e.preventDefault();exitTownInterior();}
+});
 if(window.matchMedia&&matchMedia('(pointer:coarse)').matches)
   document.getElementById('wrap').classList.add('touch');
 
