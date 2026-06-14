@@ -18,7 +18,7 @@
     objective:null,prompt:null,quizBox:null,quizTag:null,quizText:null,quizOpts:null,
     keys:new Set(),player:null,playerRoot:null,pickups:[],sparkles:[],collected:new Set(),
     nearest:null,quiz:null,onExit:null,onReward:null,rewarded:false,resizeObserver:null,
-    raf:0,lastPrompt:'',character:'storybook',mobileLite:false
+    raf:0,lastPrompt:'',character:'storybook',mobileLite:false,quality:'standard',lowPower:false,reducedFx:false
   };
 
   function $(id){return document.getElementById(id);}
@@ -27,6 +27,20 @@
   function lsGet(k,d){try{const v=JSON.parse(localStorage.getItem(storageKey(k)));return v==null?d:v;}catch(e){return d;}}
   function lsSet(k,v){try{localStorage.setItem(storageKey(k),JSON.stringify(v));}catch(e){}}
   function playSfx(name){try{if(typeof sfx!=='undefined'&&sfx&&sfx[name])sfx[name]();}catch(e){}}
+  function readExperience(){
+    const exp=typeof window.PMG_GET_EXPERIENCE==='function'?window.PMG_GET_EXPERIENCE():{};
+    const quality=['lite','standard','vivid'].includes(exp.quality)?exp.quality:'standard';
+    return {quality,reducedFx:!!exp.reducedFx};
+  }
+  function qualityPixelCap(){
+    if(state.quality==='vivid'&&!state.mobileLite)return 1.8;
+    if(state.quality==='standard')return 1.35;
+    return 1.05;
+  }
+  function detailCount(base){
+    const ratio=state.reducedFx ? .35 : (state.quality==='vivid'?1:(state.quality==='standard' ? .72 : .48));
+    return Math.max(1,Math.round(base*ratio));
+  }
 
   function start(opts={}){
     stop();
@@ -48,7 +62,11 @@
     state.quiz=null;
     state.rewarded=false;
     state.character=characterThemes[opts.character]?opts.character:'storybook';
+    const exp=readExperience();
+    state.quality=exp.quality;
+    state.reducedFx=exp.reducedFx;
     state.mobileLite=matchMedia('(pointer:coarse), (max-width: 760px)').matches;
+    state.lowPower=state.mobileLite||state.quality==='lite'||state.reducedFx;
 
     if(!window.THREE){
       setPrompt('3D 引擎沒有載入，請檢查 vendor/three.r149.min.js。');
@@ -116,12 +134,12 @@
     state.scene.fog=new THREE.Fog('#a8ddf2',18,38);
     state.camera=new THREE.PerspectiveCamera(48,16/9,.1,80);
     state.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
-    state.renderer.setPixelRatio(state.mobileLite?Math.min(window.devicePixelRatio||1,1.3):Math.min(window.devicePixelRatio||1,2));
+    state.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,qualityPixelCap()));
     if('outputColorSpace' in state.renderer&&THREE.SRGBColorSpace)state.renderer.outputColorSpace=THREE.SRGBColorSpace;
     else if('outputEncoding' in state.renderer&&THREE.sRGBEncoding)state.renderer.outputEncoding=THREE.sRGBEncoding;
     if(THREE.ACESFilmicToneMapping)state.renderer.toneMapping=THREE.ACESFilmicToneMapping;
     state.renderer.toneMappingExposure=.72;
-    state.renderer.shadowMap.enabled=!state.mobileLite;
+    state.renderer.shadowMap.enabled=state.quality==='vivid'&&!state.mobileLite&&!state.reducedFx;
     state.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
     state.viewport.innerHTML='';
     state.viewport.appendChild(state.renderer.domElement);
@@ -131,8 +149,8 @@
     state.scene.add(hemi);
     const sun=new THREE.DirectionalLight('#fff1c9',.86);
     sun.position.set(-5,9,6);
-    sun.castShadow=!state.mobileLite;
-    sun.shadow.mapSize.set(state.mobileLite?512:1024,state.mobileLite?512:1024);
+    sun.castShadow=state.renderer.shadowMap.enabled;
+    sun.shadow.mapSize.set(state.lowPower?512:1024,state.lowPower?512:1024);
     sun.shadow.camera.left=-12;sun.shadow.camera.right=12;sun.shadow.camera.top=12;sun.shadow.camera.bottom=-12;
     state.scene.add(sun);
 
@@ -165,7 +183,7 @@
     createPaperSun(scene,-6.5,-4.6);
     if(state.character==='forest')createForestAdventureProps(scene);
 
-    const flowerCount=state.mobileLite?10:18;
+    const flowerCount=detailCount(18);
     for(let i=0;i<flowerCount;i++){
       const a=i/flowerCount*Math.PI*2;
       const r=8.3+Math.sin(i*2.1)*.45;
@@ -561,9 +579,21 @@
     state.camera.updateProjectionMatrix();
     state.renderer.setSize(w,h,false);
   }
+  function applyExperience(){
+    const exp=readExperience();
+    state.quality=exp.quality;
+    state.reducedFx=exp.reducedFx;
+    state.lowPower=state.mobileLite||state.quality==='lite'||state.reducedFx;
+    if(state.renderer){
+      state.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,qualityPixelCap()));
+      state.renderer.shadowMap.enabled=state.quality==='vivid'&&!state.mobileLite&&!state.reducedFx;
+      resize();
+    }
+  }
 
   function loop(){
     if(!state.running||!state.renderer)return;
+    if(document.hidden)return;
     const dt=Math.min(.05,state.clock.getDelta());
     updatePlayer(dt);
     updatePickups(dt);
@@ -603,9 +633,14 @@
     let nearest=null,nearestD=999;
     for(const item of state.pickups){
       if(item.done)continue;
-      item.group.rotation.y+=dt*.9;
-      item.icon.position.y=.55+Math.sin(performance.now()/420+item.def.pos[0])*.07;
-      item.halo.scale.setScalar(1+Math.sin(performance.now()/360+item.def.pos[2])*.08);
+      if(state.reducedFx){
+        item.icon.position.y=.55;
+        item.halo.scale.setScalar(1);
+      }else{
+        item.group.rotation.y+=dt*.9;
+        item.icon.position.y=.55+Math.sin(performance.now()/420+item.def.pos[0])*.07;
+        item.halo.scale.setScalar(1+Math.sin(performance.now()/360+item.def.pos[2])*.08);
+      }
       if(item.cooldown>0)item.cooldown-=dt;
       const d=Math.hypot(state.player.x-item.def.pos[0],state.player.z-item.def.pos[2]);
       if(d<nearestD){nearestD=d;nearest=item;}
@@ -704,7 +739,8 @@
   }
 
   function spawnSparkles(x,y,z,color){
-    for(let i=0;i<18;i++){
+    const count=detailCount(18);
+    for(let i=0;i<count;i++){
       const s=makeMesh(new THREE.SphereGeometry(.045,10,8),color);
       s.material.emissive=new THREE.Color(color);
       s.material.emissiveIntensity=.4;
@@ -748,11 +784,13 @@
       total:pickupDefs.length,
       character:state.character,
       mobileLite:state.mobileLite,
+      quality:state.quality,
+      reducedFx:state.reducedFx,
       player:state.player?{x:+state.player.x.toFixed(2),z:+state.player.z.toFixed(2)}:null,
       nearest:state.nearest?state.nearest.def.id:null,
       quiz:state.quiz?state.quiz.item.def.id:null
     };
   }
 
-  window.Smooth3DGame={start,stop,getStatus};
+  window.Smooth3DGame={start,stop,getStatus,applyExperience};
 })();
