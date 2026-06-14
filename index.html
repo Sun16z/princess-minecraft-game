@@ -100,6 +100,13 @@ kbd{background:#333;border:1px solid #777;border-bottom:3px solid #777;padding:1
   user-select:none;-webkit-user-select:none;touch-action:none;}
 .tbtn:active{background:rgba(255,255,255,.35);}
 body.minecraft-play .touch .tbtn{display:flex;}
+body.single-play #quizP1{top:0;height:100%;}
+body.single-play #quizP2{display:none!important;}
+body.single-play #t2l,body.single-play #t2r,body.single-play #t2j,body.single-play #t2z{display:none!important;}
+body.single-play #t1l{top:auto;bottom:7%;}
+body.single-play #t1r{top:auto;bottom:7%;}
+body.single-play #t1j{top:auto;bottom:7%;}
+body.single-play #t1z{top:auto;bottom:7%;}
 #t1l{left:2%;top:31%;}   #t1r{left:calc(2% + 62px);top:31%;}
 #t1j{right:2%;top:31%;}  #t1z{right:calc(2% + 62px);top:31%;}
 #t2l{left:2%;bottom:7%;} #t2r{left:calc(2% + 62px);bottom:7%;}
@@ -130,6 +137,9 @@ body.minecraft-play .touch .tbtn{display:flex;}
 .townQuickBtn{position:absolute;right:12px;bottom:14px;display:none;z-index:2;width:56px;height:56px;font-size:25px;}
 .touch .townPad{display:grid;}
 .touch .townQuickBtn{display:block;}
+.singleMode .p2c,.singleMode .profileField:nth-of-type(2){display:none;}
+.singleMode .cols{justify-content:center;}
+.singleMode .profileGrid{grid-template-columns:1fr auto auto;}
 @media (max-width:760px){
   h1{font-size:18px;} .sub{font-size:12px;} .rules{font-size:11px;line-height:1.7;}
   .versionSel,.characterSel{grid-template-columns:1fr;gap:7px;margin-bottom:8px;}
@@ -166,8 +176,10 @@ body.minecraft-play .touch .tbtn{display:flex;}
   .profileTitle{align-items:flex-start;flex-direction:column;font-size:12px;}
   .profileTitle small{text-align:left;}
   .profileGrid{grid-template-columns:1fr 1fr;gap:5px;}
+  .singleMode .profileGrid{grid-template-columns:1fr 1fr;}
   .profileMiniBtn{width:100%;}
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
+  .singleMode .cols{grid-template-columns:1fr;}
   .card{min-width:0;line-height:1.35;font-size:10px;padding:5px 6px;overflow-wrap:anywhere;}
   .card b{font-size:12px;}
   .gradeSel{gap:2px;margin-top:4px;}
@@ -277,6 +289,7 @@ body.minecraft-play .touch .tbtn{display:flex;}
       </button>
     </div>
     <div style="margin-bottom:10px">
+      <button class="gbtn mbtn" data-m="single">👤 單人過關</button>
       <button class="gbtn mbtn active" data-m="vs">⚔️ 對戰模式</button>
       <button class="gbtn mbtn" data-m="coop">🤝 合作救小公主</button>
       <button class="gbtn" id="btnTown" style="margin-left:12px;background:#1f4d2e;color:#9fe39f;border-color:#3f8d52">🏘️ 我的小鎮</button>
@@ -299,7 +312,7 @@ body.minecraft-play .touch .tbtn{display:flex;}
       🟨 ？方塊出題（數學・英語・國語輪流，📖會自動複習之前答錯的題目）　⭐金色「！」方塊＝挑戰題：答對<b>算 2 題</b>＋4 金幣，答錯凍結 4 秒<br>
       🔥 連續答對 3 題 → 隨機道具：⚡電擊　🛡️護盾　🧲磁鐵　🍌香蕉皮（按 <kbd>S</kbd>／<kbd>↓</kbd> 使用）　🌟 落後時答對有超級衝刺！<br>
       🐾 每答對 2 題收服寵物，<b>每隻都有特殊能力</b>（跳更高、答題加時、金幣雙倍…）　🪙 金幣賽後存入「我的小鎮」蓋房子！<br>
-      🏁 <b>答對 15 題</b>＋抵達終點獲勝；合作模式＝兩人<b>合計 15 題</b>並一起抵達城堡救出小公主　📱 手機轉橫、<kbd>M</kbd> 音樂開關
+      🏁 單人／對戰＝自己<b>答對 15 題</b>＋抵達終點過關；合作模式＝兩人<b>合計 15 題</b>並一起抵達城堡救出小公主　📱 手機轉橫、<kbd>M</kbd> 音樂開關
     </div>
     <button class="bigbtn" id="btnStart">🎮 開始冒險</button>
   </div></div>
@@ -510,6 +523,8 @@ const p1=makePlayer('羅潔塔姐姐',{spawn:64, dress:'#5bc8e8',dress2:'#3a9fc0
 const p2=makePlayer('羅潔塔妹妹',{spawn:120, dress:'#5b8de8',dress2:'#3a64c0',hair:'#f5e6a8',
   keys:{l:'ArrowLeft',r:'ArrowRight',j:'ArrowUp',atk:'ArrowDown'},ansKeys:['7','8','9','0'],hud:'#a8baff',idx:2});
 const players=[p1,p2];
+function isSingleMode(){return gameMode==='single';}
+function activePlayers(){return isSingleMode()?[p1]:players;}
 function otherOf(p){return p===p1?p2:p1;}
 const chosenGrade={1:'grade5',2:'grade2'};   // 姐姐五下、妹妹二下
 function setGradeForSlot(pn,grade){
@@ -538,8 +553,18 @@ function renderProfileSelects(){
     sel.value=selectedProfileIds[pn];
   });
   syncSlotFromProfile('1');syncSlotFromProfile('2');
+  updateProfileHint();
+}
+function updateProfileHint(){
   const same=selectedProfileIds[1]===selectedProfileIds[2];
-  document.getElementById('profileHint').textContent=same?'玩家一、二目前使用同一個檔案':'進度只存在這台裝置的瀏覽器';
+  const hint=document.getElementById('profileHint');
+  if(!hint)return;
+  hint.textContent=isSingleMode()?'單人模式只使用玩家一檔案':(same?'玩家一、二目前使用同一個檔案':'進度只存在這台裝置的瀏覽器');
+}
+function syncModeUi(){
+  document.getElementById('startScr').classList.toggle('singleMode',isSingleMode());
+  document.querySelectorAll('.mbtn').forEach(x=>x.classList.toggle('active',x.dataset.m===gameMode));
+  updateProfileHint();
 }
 function selectProfileForSlot(pn,id){
   if(!profileStore.profiles.some(p=>p.id===id))return;
@@ -578,7 +603,7 @@ document.getElementById('btnProfileAdd').onclick=addLocalProfile;
 document.getElementById('btnProfileRename').onclick=renameActiveProfile;
 document.querySelectorAll('.mbtn').forEach(b=>{
   b.onclick=()=>{gameMode=b.dataset.m;
-    document.querySelectorAll('.mbtn').forEach(x=>x.classList.toggle('active',x===b));};
+    syncModeUi();};
 });
 document.querySelectorAll('.versionCard').forEach(b=>{
   b.onclick=()=>{
@@ -794,7 +819,7 @@ function openQuiz(p,gold){
 }
 function grantItem(p){
   if(p.item){p.coins+=3;toast(p.x+12,p.y-34,'道具滿了 🪙+3','#ffe14d');return;}
-  const pool=gameMode==='coop'?['zap','shield','magnet']:Object.keys(ITEMS);
+  const pool=gameMode==='vs'?Object.keys(ITEMS):['zap','shield','magnet'];
   p.item=pool[irnd(pool.length)];
   sfx.charge();
   toast(p.x+12,p.y-34,'獲得 '+ITEMS[p.item].e+ITEMS[p.item].name+'！按 '+(p===p1?'S':'↓')+' 使用','#ffe14d');
@@ -870,7 +895,7 @@ function useItem(p){
   const o=otherOf(p);
   if(it==='zap'){
     sfx.zap();
-    if(gameMode==='coop'){
+    if(gameMode==='coop'||gameMode==='single'){
       enemies.forEach(e=>{e.frzT=300;});
       toast(p.x+12,p.y-30,'⚡ 全場苦力怕凍結 5 秒！','#9fe3ff');
     }else if(o.shield){o.shield=false;sfx.shield();toast(o.x+12,o.y-30,'🛡️ 護盾擋下電擊！','#9fe3ff');}
@@ -889,12 +914,12 @@ function useItem(p){
 const keys=new Set();
 window.addEventListener('keydown',e=>{
   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code))e.preventDefault();
-  for(const p of players){
+  for(const p of activePlayers()){
     if(p.quiz&&!p.quiz.done){const i=p.ansKeys.indexOf(e.key);if(i>=0){answerQuiz(p,i);return;}}
   }
   if(e.code==='KeyM'&&!e.repeat){initAudio();setBgm(!bgmOn);return;}
   if(e.code==='KeyP'&&!e.repeat){togglePause();return;}
-  if(!e.repeat)for(const p of players){
+  if(!e.repeat)for(const p of activePlayers()){
     if(e.code===p.keys.j)p.jumpBuf=7;
     if(e.code===p.keys.atk)useItem(p);
   }
@@ -902,7 +927,7 @@ window.addEventListener('keydown',e=>{
 });
 window.addEventListener('keyup',e=>{
   keys.delete(e.code);
-  for(const p of players)if(e.code===p.keys.j&&p.vy<-4)p.vy*=.55;   // 可變跳高
+  for(const p of activePlayers())if(e.code===p.keys.j&&p.vy<-4)p.vy*=.55;   // 可變跳高
 });
 window.addEventListener('blur',()=>keys.clear());
 
@@ -992,7 +1017,11 @@ function updatePlayer(p){
   if(p.flagMsgT>0)p.flagMsgT--;
   p.atFlag=p.x+p.w>flagX*T-40;
   if(state==='play'&&p.x+p.w>flagX*T+8){
-    if(gameMode==='vs'){
+    if(gameMode==='single'){
+      if(p.correct>=WIN_CORRECT){endGame(p);}
+      else if(p.flagMsgT<=0){p.flagMsgT=150;sfx.hurt();
+        toast(p.x+12,p.y-34,'還差 '+(WIN_CORRECT-p.correct)+' 題就能過關！','#ff8589');}
+    }else if(gameMode==='vs'){
       if(p.correct>=WIN_CORRECT){endGame(p);}
       else if(p.flagMsgT<=0){p.flagMsgT=150;sfx.hurt();
         toast(p.x+12,p.y-34,'還差 '+(WIN_CORRECT-p.correct)+' 題！回頭找？方塊','#ff8589');}
@@ -1030,7 +1059,7 @@ function updateEnemy(e){
   const ahead=e.vx>0?e.x+e.w+2:e.x-2;
   const c=Math.floor(ahead/T),rb=Math.floor((e.y+e.h/2)/T),rf=Math.floor((e.y+e.h+4)/T);
   if(solid(tileAt(c,rb))||!solid(tileAt(c,rf)))e.vx*=-1;
-  for(const p of players){
+  for(const p of activePlayers()){
     if(!aabb(p,e))continue;
     if(p.vy>1.2&&p.y+p.h-e.y<16){e.dead=1;p.vy=-7.5;p.coins+=2;sfx.stomp();
       spawnParts(e.x+13,e.y+10,'#7ae582',14,4);}
@@ -1185,7 +1214,8 @@ function drawFlagAndCastle(){
   ctx.font='bold 18px sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';
   ctx.fillText('🏁 終點', cx+3*T, cy-30);
   ctx.font='bold 13px "Microsoft JhengHei",sans-serif';ctx.fillStyle='#ffd84d';
-  ctx.fillText(gameMode==='coop'?'合計答對 '+WIN_CORRECT+' 題＋兩人都到！':'要答對 '+WIN_CORRECT+' 題才能贏！', cx+3*T, cy-10);ctx.textAlign='left';
+  const goalText=gameMode==='coop'?'合計答對 '+WIN_CORRECT+' 題＋兩人都到！':(gameMode==='single'?'答對 '+WIN_CORRECT+' 題後抵達終點！':'要答對 '+WIN_CORRECT+' 題才能贏！');
+  ctx.fillText(goalText, cx+3*T, cy-10);ctx.textAlign='left';
 }
 function drawWorld(camx){
   const c0=Math.max(0,(camx/T)|0),c1=Math.min(COLS-1,((camx+W)/T)|0);
@@ -1198,8 +1228,8 @@ function drawWorld(camx){
   for(const pt of particles){ctx.fillStyle=pt.col;ctx.globalAlpha=Math.min(1,pt.life/20);
     ctx.fillRect(pt.x-3,pt.y-3,6,6);}
   ctx.globalAlpha=1;
-  for(const p of players)for(const pt of p.pets)drawPet(pt);
-  drawPrincess(p1);drawPrincess(p2);
+  for(const p of activePlayers())for(const pt of p.pets)drawPet(pt);
+  for(const p of activePlayers())drawPrincess(p);
   ctx.font='bold 14px "Microsoft JhengHei",sans-serif';ctx.textAlign='center';
   for(const tx of texts){
     ctx.globalAlpha=Math.min(1,tx.life/30);
@@ -1208,21 +1238,24 @@ function drawWorld(camx){
   }
   ctx.globalAlpha=1;ctx.textAlign='left';
 }
-let skyGrad={theme:null,top:null,bot:null};
-function skyGradFor(vy){
-  if(skyGrad.theme!==THEME){skyGrad.theme=THEME;
-    [['top',0],['bot',VH]].forEach(([k,y])=>{
-      const g=ctx.createLinearGradient(0,y,0,y+VH);
-      g.addColorStop(0,THEME.skyA);g.addColorStop(1,THEME.skyB);skyGrad[k]=g;});}
-  return vy===0?skyGrad.top:skyGrad.bot;
+let skyGrad={theme:null,cache:{}};
+function skyGradFor(vy,vh=VH){
+  if(skyGrad.theme!==THEME){skyGrad.theme=THEME;skyGrad.cache={};}
+  const key=vy+'|'+vh;
+  if(!skyGrad.cache[key]){
+    const g=ctx.createLinearGradient(0,vy,0,vy+vh);
+    g.addColorStop(0,THEME.skyA);g.addColorStop(1,THEME.skyB);
+    skyGrad.cache[key]=g;
+  }
+  return skyGrad.cache[key];
 }
-function drawSky(vy,camx){
-  ctx.fillStyle=skyGradFor(vy);ctx.fillRect(0,vy,W,VH);
+function drawSky(vy,camx,vh=VH){
+  ctx.fillStyle=skyGradFor(vy,vh);ctx.fillRect(0,vy,W,vh);
   if(THEME.night){
     ctx.fillStyle='#fffbe8';
     for(let i=0;i<40;i++){const u=h2(i*13,7),v=h2(i*29,3);
       const tw=.4+.6*Math.abs(Math.sin(frame/30+i));
-      ctx.globalAlpha=tw;ctx.fillRect(((u*2400-camx*.2)%2400+2400)%2400-100,vy+10+v*180,3,3);}
+      ctx.globalAlpha=tw;ctx.fillRect(((u*2400-camx*.2)%2400+2400)%2400-100,vy+10+v*Math.max(180,vh-80),3,3);}
     ctx.globalAlpha=1;
     ctx.fillStyle='#e8e4d8';ctx.fillRect(W-110,vy+18,40,40);
     ctx.fillStyle=THEME.skyA;ctx.fillRect(W-122,vy+14,28,28);
@@ -1232,13 +1265,13 @@ function drawSky(vy,camx){
     ctx.fillStyle='rgba(255,255,255,.92)';
     for(let i=0;i<10;i++){
       const cw=70+(i%3)*30,cx0=(i*531)%2400,sx=((cx0-camx*.35)%2400+2400)%2400-200;
-      const cy=vy+24+(i*47)%110;
+      const cy=vy+24+(i*47)%Math.max(110,vh-120);
       ctx.fillRect(sx,cy,cw,18);ctx.fillRect(sx+14,cy-12,cw-30,12);}
   }
   ctx.fillStyle=THEME.hill;
   for(let i=0;i<14;i++){const hx0=(i*731)%3000,sx=((hx0-camx*.6)%3000+3000)%3000-260;
     const hh=50+(i*83)%70;
-    ctx.fillRect(sx,vy+VH-hh,150,hh);ctx.fillRect(sx+30,vy+VH-hh-26,90,30);}
+    ctx.fillRect(sx,vy+vh-hh,150,hh);ctx.fillRect(sx+30,vy+vh-hh-26,90,30);}
 }
 function drawHUD(p,vy){
   ctx.font='bold 13px "Microsoft JhengHei",sans-serif';
@@ -1254,18 +1287,19 @@ function drawHUD(p,vy){
   ctx.lineWidth=3;ctx.strokeStyle='#000';ctx.strokeText(txt,30,vy+21);
   ctx.fillStyle='#fff';ctx.fillText(txt,30,vy+21);
 }
-function viewportFor(p){
+function viewportFor(p,vh=VH){
   const camx=Math.max(0,Math.min(COLS*T-W,p.x+p.w/2-W/2));
-  const camy=Math.max(0,Math.min(WORLDH-VH,p.y+p.h/2-VH/2));
+  const camy=Math.max(0,Math.min(Math.max(0,WORLDH-vh),p.y+p.h/2-vh/2));
   return {camx,camy};
 }
 function draw(){
   ctx.clearRect(0,0,W,H);
-  [[p1,0],[p2,VH]].forEach(([p,vy])=>{
+  const viewports=isSingleMode()?[[p1,0,H]]:[[p1,0,VH],[p2,VH,VH]];
+  viewports.forEach(([p,vy,vh])=>{
     viewP=p;
-    const {camx,camy}=viewportFor(p);
-    ctx.save();ctx.beginPath();ctx.rect(0,vy,W,VH);ctx.clip();
-    drawSky(vy,camx);
+    const {camx,camy}=viewportFor(p,vh);
+    ctx.save();ctx.beginPath();ctx.rect(0,vy,W,vh);ctx.clip();
+    drawSky(vy,camx,vh);
     const sx=p.shakeT>0?(Math.random()-.5)*8:0, sy=p.shakeT>0?(Math.random()-.5)*8:0;
     ctx.translate(-camx+sx,vy-camy+sy);
     drawWorld(camx);
@@ -1278,16 +1312,18 @@ function draw(){
   });
   // 進度條（終盤閃爍）
   const goal=flagX*T;
-  const rush=Math.max(p1.x,p2.x)/goal>.82||Math.max(p1.correct,p2.correct)>=WIN_CORRECT-3;
+  const ap=activePlayers();
+  const rush=Math.max(...ap.map(p=>p.x))/goal>.82||Math.max(...ap.map(p=>p.correct))>=WIN_CORRECT-3;
   bgmDur=rush&&state==='play'?.112:.135;
-  ctx.fillStyle='#14121f';ctx.fillRect(0,VH-5,W,10);
-  ctx.fillStyle=rush&&(frame>>3)%2===0?'#6a5a2a':'#3a3654';ctx.fillRect(8,VH-3,W-16,6);
-  for(const p of players){
+  const progY=isSingleMode()?H-20:VH-5;
+  ctx.fillStyle='#14121f';ctx.fillRect(0,progY,W,10);
+  ctx.fillStyle=rush&&(frame>>3)%2===0?'#6a5a2a':'#3a3654';ctx.fillRect(8,progY+2,W-16,6);
+  for(const p of ap){
     const px=8+Math.min(1,p.x/goal)*(W-30);
-    ctx.fillStyle=p.hud;ctx.fillRect(px,VH-7,14,14);
-    ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.strokeRect(px,VH-7,14,14);
+    ctx.fillStyle=p.hud;ctx.fillRect(px,progY-2,14,14);
+    ctx.strokeStyle='#000';ctx.lineWidth=2;ctx.strokeRect(px,progY-2,14,14);
   }
-  ctx.fillStyle='#37c24f';ctx.fillRect(W-20,VH-8,6,16);
+  ctx.fillStyle='#37c24f';ctx.fillRect(W-20,progY-3,6,16);
   // 倒數與暫停疊加層
   if(state==='count'){
     ctx.fillStyle='rgba(10,8,20,.45)';ctx.fillRect(0,0,W,H);
@@ -1747,7 +1783,7 @@ function update(){
   }
   if(state==='play'){
     gameFrames++;
-    for(const p of players)updatePlayer(p);
+    for(const p of activePlayers())updatePlayer(p);
     enemies=enemies.filter(e=>e.dead<30);
     for(const e of enemies)updateEnemy(e);
     bananas=bananas.filter(b=>!b.hit);
@@ -1765,6 +1801,7 @@ function update(){
 //==================== 開始／結束 ====================
 function resetGame(){
   document.body.classList.add('minecraft-play');
+  document.body.classList.toggle('single-play',isSingleMode());
   activeStorageProfileId=selectedProfileIds[1];
   buildLevel();
   THEME=THEMES[irnd(THEMES.length)];
@@ -1798,7 +1835,7 @@ function addTownCoinsForProfile(profileId,amount){
 }
 function rewardTownForPlayers(){
   const byProfile={};
-  for(const p of players){
+  for(const p of activePlayers()){
     const id=playerProfileId(p);
     byProfile[id]=(byProfile[id]||0)+p.coins+p.correct;
   }
@@ -1818,9 +1855,12 @@ function coopBestKey(){
   return 'pmgCoopBest:'+[selectedProfileIds[1],selectedProfileIds[2]].sort().join(':');
 }
 function showEnd(){
-  document.body.classList.remove('minecraft-play');
+  document.body.classList.remove('minecraft-play','single-play');
   const rewardRows=rewardTownForPlayers();
-  if(gameMode==='coop'&&coopWin){
+  if(gameMode==='single'){
+    document.getElementById('endTitle').textContent='🎉 '+winner.name+' 單人過關！';
+    document.getElementById('endSub').textContent='自己答題、自己抵達終點，完成一人冒險！';
+  }else if(gameMode==='coop'&&coopWin){
     document.getElementById('endTitle').textContent='🎉 成功救出小公主！';
     const sec=Math.round(gameFrames/60);
     const bestKey=coopBestKey();
@@ -1834,13 +1874,13 @@ function showEnd(){
     document.getElementById('endSub').textContent='恭喜抵達終點城堡！';
   }
   const stats=document.getElementById('endStats');stats.innerHTML='';
-  for(const p of players){
+  for(const p of activePlayers()){
     const att=p.correct+p.wrongN;
     const acc=att===0?0:Math.round(p.correct/att*100);
     const d=document.createElement('div');
     d.className='card '+(p===p1?'p1c':'p2c');
     let html='<b>'+(p===p1?'🌟 ':'💫 ')+p.name+'〔'+GRADES[p.grade].label+'〕'
-      +(gameMode==='vs'&&p===winner?'（冠軍）':'')+'</b><br>'
+      +((gameMode==='vs'&&p===winner)?'（冠軍）':(gameMode==='single'?'（過關）':''))+'</b><br>'
       +'✔ 答對 '+p.correct+'　✘ 答錯 '+p.wrongN+'（正確率 '+acc+'%）<br>'
       +'🔥 最高連擊 x'+p.bestStreak+'　🪙 '+p.coins+'　🐾 '+p.pets.length+'/'+MONSTERS.length;
     if(p.wrongList.length){
@@ -1858,7 +1898,7 @@ function startSmoothVersion(){
   reloadTownState();
   rememberSelections();
   stopBGM();keys.clear();state='smooth';
-  document.body.classList.remove('minecraft-play');
+  document.body.classList.remove('minecraft-play','single-play');
   for(const p of players){panelOf(p).classList.add('hidden');p.quiz=null;p.frozen=false;}
   document.getElementById('wrap').classList.add('smooth-mode');
   document.getElementById('smooth3dLayer').classList.remove('hidden');
@@ -1881,7 +1921,7 @@ function exitSmoothVersion(){
   document.body.classList.remove('minecraft-play');
   document.getElementById('smooth3dLayer').classList.add('hidden');
   document.getElementById('startScr').classList.remove('hidden');
-  keys.clear();state='start';
+  keys.clear();document.body.classList.remove('single-play');state='start';
 }
 document.getElementById('btnSmoothBack').onclick=exitSmoothVersion;
 document.getElementById('btnStart').onclick=()=>{
@@ -1944,14 +1984,14 @@ if(window.matchMedia&&matchMedia('(pointer:coarse)').matches)
     if(profileStore.profiles.some(p=>p.id===sel.p1Profile))selectedProfileIds[1]=sel.p1Profile;
     if(profileStore.profiles.some(p=>p.id===sel.p2Profile))selectedProfileIds[2]=sel.p2Profile;
     activeStorageProfileId=selectedProfileIds[1];
-    gameMode=sel.mode||gameMode; activeVersion=sel.version||activeVersion; smoothCharacter=sel.character||smoothCharacter;
+    if(['single','vs','coop'].includes(sel.mode))gameMode=sel.mode;
+    activeVersion=sel.version||activeVersion; smoothCharacter=sel.character||smoothCharacter;
   }
   const params=new URLSearchParams(location.search);
   if(['minecraft','smooth'].includes(params.get('version')))activeVersion=params.get('version');
   if(['storybook','forest'].includes(params.get('character')))smoothCharacter=params.get('character');
   syncSlotFromProfile('1');syncSlotFromProfile('2');renderProfileSelects();
-  document.querySelectorAll('.mbtn').forEach(b=>
-    b.classList.toggle('active',b.dataset.m===gameMode));
+  syncModeUi();
   document.querySelectorAll('.versionCard').forEach(b=>
     b.classList.toggle('active',b.dataset.version===activeVersion));
   document.querySelectorAll('.characterCard').forEach(b=>
