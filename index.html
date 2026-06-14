@@ -791,7 +791,7 @@ function openQuiz(p,gold){
     while(p.recentQ.includes(q.prompt)&&tries<4){q=gen();tries++;}
   }
   p.recentQ.push(q.prompt); if(p.recentQ.length>10)p.recentQ.shift();
-  const timer=(25+(gold?5:0)+(hasPetIdx(p,1)?5:0))*60;
+  const timer=(30+(gold?5:0)+(hasPetIdx(p,1)?5:0))*60;
   p.quiz={q,timer,done:false,gold:!!gold,review};
   p.frozen=true;
   const pn=panelOf(p);
