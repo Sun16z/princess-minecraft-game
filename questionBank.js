@@ -9,6 +9,7 @@ const MODES = {
 const GRADES = {
   grade2: { id: 'grade2', label: '二下', name: '國小二年級下學期期末' },
   grade3: { id: 'grade3', label: '三上', name: '國小三年級上學期' },
+  grade4: { id: 'grade4', label: '四下', name: '國小四年級下學期期末' },
   grade5: { id: 'grade5', label: '五下', name: '國小五年級下學期期末' },
   grade6: { id: 'grade6', label: '六上', name: '國小六年級上學期' },
 };
@@ -33,6 +34,12 @@ const CURRICULUM_OUTLINE = {
     math: ['一萬以內數與位值', '加減直式與估算', '乘除與倍數情境', '同分母分數與一位小數', '毫米、容量、重量、時間與角'],
     english: ['自然發音與字母拼讀', '問候與自我介紹', '教室與家庭單字', '顏色、數字與喜好句', '簡短問答'],
     natural: ['植物的身體', '動物與棲地', '天氣觀察', '水的三態與溶解', '磁力與生活'],
+  },
+  grade4: {
+    mandarin: ['字音字形與詞義', '成語與句型', '段落大意', '閱讀推論', '標點與修辭'],
+    math: ['大數與概數', '整數乘除與四則', '同分母分數加減', '一位與二位小數', '角度、周長、面積與體積初步'],
+    english: ['日常活動與時間', '場所與方位', '食物與購物', '現在進行式', '簡短對話閱讀'],
+    natural: ['水的移動與變化', '昆蟲與動物生活史', '月亮與天體觀察', '力與運動', '電路與生活'],
   },
   grade5: {
     mandarin: ['詞義辨析', '成語與語詞', '修辭判讀', '句型改寫', '閱讀推論'],
@@ -1462,6 +1469,21 @@ MANDARIN_BANK.grade3 = [
   { domain: '詞語辨析', prompt: '哪一個詞語最適合形容「做事前想清楚步驟」？', answer: '計畫', choices: ['計畫', '喧鬧', '潮濕', '遺失'], explanation: '計畫是事先安排做法。', tip: '安排步驟就是有計畫。' },
 ];
 
+MANDARIN_BANK.grade4 = [
+  { domain: '字音字形', prompt: '哪一個詞語用字正確？', answer: '鍛鍊', choices: ['鍛鍊', '段練', '煅煉', '段鍊'], explanation: '「鍛鍊」表示透過練習讓身體或能力更好。', tip: '鍛鍊和金字旁的「鍛」有關，常表示反覆磨練。' },
+  { domain: '詞義辨析', prompt: '「沉著」最接近哪一個意思？', answer: '遇事冷靜不慌張', choices: ['遇事冷靜不慌張', '跑得非常快', '聲音很大', '故意拖延'], explanation: '沉著表示面對事情時能保持冷靜。', tip: '考試時沉著，就是先穩住心情。' },
+  { domain: '成語', prompt: '「全神貫注」最適合形容哪一種情況？', answer: '專心看書不受干擾', choices: ['專心看書不受干擾', '一邊吃飯一邊玩', '忘記帶聯絡簿', '把東西排成一列'], explanation: '全神貫注表示精神完全集中在一件事上。', tip: '「全神」就是全部精神都放進去。' },
+  { domain: '句型', prompt: '「雖然今天下雨，」最適合接哪一句？', answer: '但是我們仍然準時到校。', choices: ['但是我們仍然準時到校。', '因為書包很輕。', '所以昨天很熱。', '或者他正在畫畫。'], explanation: '「雖然……但是……」表示前後有轉折。', tip: '看到雖然，常接但是、仍然。' },
+  { domain: '標點', prompt: '句子「咦 這裡怎麼有一封信」中間最適合加哪個標點？', answer: '，', choices: ['，', '。', '、', '：'], explanation: '「咦」是語氣詞，後面通常用逗號讓語氣停一下。', tip: '語氣詞後面常短暫停頓。' },
+  { domain: '修辭', prompt: '「風把窗簾輕輕推開」用了哪一種修辭？', answer: '擬人', choices: ['擬人', '譬喻', '排比', '誇飾'], explanation: '把風寫得像人一樣會「推開」，屬於擬人。', tip: '把不是人的東西寫成會做人類動作，就是擬人。' },
+  { domain: '段落大意', prompt: '「奶奶先把麵團揉圓，再放入烤箱，最後端出香噴噴的麵包。」這段主要在說？', answer: '奶奶做麵包的過程', choices: ['奶奶做麵包的過程', '奶奶去市場買菜', '烤箱壞掉了', '麵包店打烊了'], explanation: '句子依序說明揉麵、烘烤、端出麵包，是製作過程。', tip: '把先、再、最後串起來看。' },
+  { domain: '閱讀推論', prompt: '「小杰把傘借給同學，自己等雨小一點才回家。」可以推論小杰？', answer: '願意替別人著想', choices: ['願意替別人著想', '討厭同學', '忘記帶傘', '很想淋雨'], explanation: '他把傘借出去，代表能照顧同學需要。', tip: '從人物行動推想個性。' },
+  { domain: '語句銜接', prompt: '「妹妹每天練習直笛，＿＿表演時吹得很穩。」空格最適合填？', answer: '因此', choices: ['因此', '可是', '除非', '或者'], explanation: '前面是原因，後面是結果，適合用「因此」。', tip: '先找出原因和結果。' },
+  { domain: '閱讀理解', prompt: '「這座公園有大片草地、兒童遊具和環湖步道。」這句主要在介紹公園的？', answer: '設施與環境', choices: ['設施與環境', '開放時間', '交通費用', '管理員姓名'], explanation: '草地、遊具、步道都是公園裡的設施或環境特色。', tip: '列出的名詞都在描述同一個地方。' },
+  { domain: '詞語理解', prompt: '「琳瑯滿目」常用來形容什麼？', answer: '物品種類很多，看起來很豐富', choices: ['物品種類很多，看起來很豐富', '天空完全沒有雲', '聲音非常小', '路面很平坦'], explanation: '琳瑯滿目形容美好或豐富的東西很多，讓人看不完。', tip: '逛市集看到很多東西時很適合用。' },
+  { domain: '句子改寫', prompt: '把「他跑得很快。」改成更生動的句子，哪一句最好？', answer: '他像一陣風似的向前跑。', choices: ['他像一陣風似的向前跑。', '他跑。', '他很快很快很快。', '他沒有跑。'], explanation: '用「像一陣風」能讓速度的感覺更鮮明。', tip: '生動句子會讓畫面更清楚。' },
+];
+
 MANDARIN_BANK.grade6 = [
   { domain: '成語', prompt: '「鍥而不捨」最接近哪一個意思？', answer: '持續努力不放棄', choices: ['持續努力不放棄', '把東西丟掉', '一直改變主意', '遇事只靠運氣'], explanation: '鍥而不捨比喻有恆心，持續努力。', tip: '想想「不捨」就是不放下。' },
   { domain: '成語', prompt: '「見微知著」的意思是什麼？', answer: '從小地方看出大趨勢', choices: ['從小地方看出大趨勢', '看見微小的字就寫下來', '故意忽略細節', '只注意結果不看原因'], explanation: '見微知著表示能從細微跡象推知明顯結果。', tip: '微是小，著是明顯。' },
@@ -1490,6 +1512,21 @@ ENGLISH_BANK.grade3 = [
   { word: 'brown', zh: '棕色', sentence: 'The dog is brown.', blank: 'The dog is ___.', distractors: ['purple', 'mother', 'pencil'] },
 ];
 
+ENGLISH_BANK.grade4 = [
+  { word: 'breakfast', zh: '早餐', sentence: 'I eat breakfast at seven.', blank: 'I eat ___ at seven.', distractors: ['homework', 'window', 'purple'] },
+  { word: 'lunch', zh: '午餐', sentence: 'She has lunch at school.', blank: 'She has ___ at school.', distractors: ['shoes', 'bed', 'rainy'] },
+  { word: 'dinner', zh: '晚餐', sentence: 'We have dinner at six thirty.', blank: 'We have ___ at six thirty.', distractors: ['music', 'bathroom', 'green'] },
+  { word: 'library', zh: '圖書館', sentence: 'I read books in the library.', blank: 'I read books in the ___.', distractors: ['kitchen', 'zoo', 'shirt'] },
+  { word: 'bakery', zh: '麵包店', sentence: 'The bakery smells good.', blank: 'The ___ smells good.', distractors: ['river', 'pencil', 'bedroom'] },
+  { word: 'hungry', zh: '餓的', sentence: 'I am hungry. I want a sandwich.', blank: 'I am ___. I want a sandwich.', distractors: ['tired', 'sunny', 'behind'] },
+  { word: 'thirsty', zh: '口渴的', sentence: 'He is thirsty. He drinks water.', blank: 'He is ___. He drinks water.', distractors: ['happy', 'small', 'library'] },
+  { word: 'between', zh: '在兩者中間', sentence: 'The cat is between the boxes.', blank: 'The cat is ___ the boxes.', distractors: ['under', 'on', 'breakfast'] },
+  { word: 'What time is it?', zh: '現在幾點？', sentence: 'What time is it? It is eight o clock.', blank: '___ It is eight o clock.', distractors: ['Where are you?', 'Do you like milk?', 'How old is she?'] },
+  { word: 'Where is the bakery?', zh: '麵包店在哪裡？', sentence: 'Where is the bakery? It is near the park.', blank: '___ It is near the park.', distractors: ['What color is it?', 'Can you swim?', 'What time is it?'] },
+  { word: 'I am washing my face.', zh: '我正在洗臉。', sentence: 'I am washing my face.', blank: 'I am ___ my face.', distractors: ['wash', 'washes', 'washed'] },
+  { word: 'She is feeding the pet.', zh: '她正在餵寵物。', sentence: 'She is feeding the pet.', blank: 'She is ___ the pet.', distractors: ['feed', 'feeds', 'fed'] },
+];
+
 ENGLISH_BANK.grade6 = [
   { word: 'yesterday', zh: '昨天', sentence: 'I played basketball yesterday.', blank: 'I played basketball ___.', distractors: ['tomorrow', 'library', 'delicious'] },
   { word: 'visited', zh: '拜訪、參觀', sentence: 'We visited a museum last Sunday.', blank: 'We ___ a museum last Sunday.', distractors: ['visit', 'visits', 'visiting'] },
@@ -1516,6 +1553,21 @@ NATURAL_BANK.grade3 = [
   { domain: '磁力與生活', prompt: '兩個磁鐵的同極靠近時，通常會？', answer: '互相排斥', choices: ['互相排斥', '變成水', '完全消失', '發出花香'], explanation: '磁鐵同極相斥，異極相吸。', tip: '一樣的磁極會推開。' },
   { domain: '觀察方法', prompt: '做自然觀察紀錄時，哪一個做法最好？', answer: '寫下日期、看到的現象和簡單圖', choices: ['寫下日期、看到的現象和簡單圖', '只寫自己心情', '把植物拔起來', '完全不記錄'], explanation: '好的紀錄會包含時間、現象與圖或表。', tip: '紀錄要讓之後的人看得懂。' },
   { domain: '生活中的力', prompt: '用手推門，門打開了，表示力可以改變物體的什麼？', answer: '運動狀態', choices: ['運動狀態', '名字', '顏色一定變紅', '重量立刻消失'], explanation: '力可以讓靜止的物體開始動，或改變運動方向。', tip: '推、拉都和力有關。' },
+];
+
+NATURAL_BANK.grade4 = [
+  { domain: '水的移動', prompt: '植物根吸收的水分，主要會經由哪個構造往上運送？', answer: '莖', choices: ['莖', '花瓣', '果皮', '種子外殼'], explanation: '根吸收水分後，會透過莖運送到葉和其他部位。', tip: '莖像植物身體裡的通道。' },
+  { domain: '水的變化', prompt: '水受熱變成水蒸氣，這種現象叫做？', answer: '蒸發', choices: ['蒸發', '凝固', '沉澱', '磁化'], explanation: '液態水變成氣態水蒸氣叫蒸發。', tip: '濕衣服曬乾也和蒸發有關。' },
+  { domain: '昆蟲生活史', prompt: '蝴蝶的成長順序最正確的是？', answer: '卵、幼蟲、蛹、成蟲', choices: ['卵、幼蟲、蛹、成蟲', '卵、蛹、幼蟲、成蟲', '成蟲、卵、蛹、幼蟲', '幼蟲、成蟲、卵、蛹'], explanation: '蝴蝶會經過完全變態：卵、幼蟲、蛹、成蟲。', tip: '毛毛蟲是蝴蝶的幼蟲。' },
+  { domain: '動物生活史', prompt: '青蛙從蝌蚪長成成蛙時，哪一項變化最明顯？', answer: '長出腳並逐漸失去尾巴', choices: ['長出腳並逐漸失去尾巴', '變成昆蟲', '身體長出羽毛', '完全不需要水'], explanation: '蝌蚪會長出後腳、前腳，尾巴逐漸消失，成為青蛙。', tip: '想想蝌蚪和青蛙外形差異。' },
+  { domain: '月亮觀察', prompt: '同一個月中，月亮看起來形狀改變，主要稱為？', answer: '月相變化', choices: ['月相變化', '地震', '風向改變', '磁極交換'], explanation: '月亮亮面看起來會隨時間改變，稱為月相變化。', tip: '新月、上弦月、滿月都屬於月相。' },
+  { domain: '天體觀察', prompt: '晚上觀察月亮時，哪一個紀錄最有幫助？', answer: '日期、時間、位置和形狀', choices: ['日期、時間、位置和形狀', '早餐吃什麼', '書包顏色', '電視節目名稱'], explanation: '天體觀察需要固定紀錄日期、時間、方向位置與外形。', tip: '好的觀察紀錄要能比較變化。' },
+  { domain: '力與運動', prompt: '用力拉橡皮筋，橡皮筋形狀改變，表示力可以？', answer: '改變物體形狀', choices: ['改變物體形狀', '讓物體消失', '製造陽光', '讓水結冰'], explanation: '力可以改變物體的形狀，也可能改變運動狀態。', tip: '拉、壓、彎都能讓形狀改變。' },
+  { domain: '摩擦力', prompt: '鞋底有紋路，主要可以增加什麼？', answer: '摩擦力', choices: ['摩擦力', '月光', '水蒸氣', '聲音速度'], explanation: '鞋底紋路能增加鞋子和地面的摩擦力，降低滑倒機會。', tip: '雨天走路怕滑，就和摩擦力有關。' },
+  { domain: '電路', prompt: '要讓小燈泡發亮，電路必須是什麼狀態？', answer: '形成通路', choices: ['形成通路', '完全斷開', '只放在桌上', '把電池拿走'], explanation: '電池、導線和燈泡連成通路，電流才能流動。', tip: '電流要有完整路徑。' },
+  { domain: '導體與絕緣體', prompt: '下列哪一種物品最容易導電？', answer: '銅線', choices: ['銅線', '塑膠尺', '木筷', '橡皮擦'], explanation: '金屬通常是良好導體，銅線很常用來導電。', tip: '電線裡面常有金屬。' },
+  { domain: '聲音與振動', prompt: '彈吉他時，主要是哪個部分振動產生聲音？', answer: '琴弦', choices: ['琴弦', '琴盒顏色', '椅子腳', '樂譜封面'], explanation: '琴弦被撥動後振動，會產生聲音。', tip: '聲音常和振動有關。' },
+  { domain: '實驗設計', prompt: '比較不同材質導電性時，最應該一次改變哪一項？', answer: '測試的材質', choices: ['測試的材質', '電池數量和燈泡種類全部改掉', '紀錄方式每次亂換', '每次都換不同桌子'], explanation: '公平測試應一次改變一個主要變因，其他條件盡量相同。', tip: '一次只改一個條件，結果才好比較。' },
 ];
 
 NATURAL_BANK.grade6 = [
@@ -2190,6 +2242,210 @@ function generateGrade3MathQuestion({ grade = 'grade3', level = 1, wave = 1, str
   });
 }
 
+function generateGrade4MathQuestion({ grade = 'grade4', level = 1, wave = 1, streak = 0 } = {}, rng = Math.random) {
+  const typeIndex = (level + wave + Math.floor(streak / 2) + Math.floor(rng() * 13)) % 14;
+
+  if (typeIndex === 0) {
+    const tenThousands = 2 + Math.floor(rng() * 8);
+    const thousands = Math.floor(rng() * 10);
+    const hundreds = Math.floor(rng() * 10);
+    const tens = Math.floor(rng() * 10);
+    const ones = Math.floor(rng() * 10);
+    const number = tenThousands * 10000 + thousands * 1000 + hundreds * 100 + tens * 10 + ones;
+    return makeQuestion({
+      subject: 'math', grade, domain: '大數位值',
+      prompt: `${number} 的千位數字是多少？`,
+      answer: String(thousands),
+      choices: buildNumberChoices(thousands, rng, 4),
+      explanation: `${number} 中，萬位是 ${tenThousands}，千位是 ${thousands}，百位是 ${hundreds}。`,
+      tip: '從右邊數：個位、十位、百位、千位、萬位。',
+    });
+  }
+
+  if (typeIndex === 1) {
+    const number = 1200 + Math.floor(rng() * 7800);
+    const answer = Math.round(number / 100) * 100;
+    return makeQuestion({
+      subject: 'math', grade, domain: '概數',
+      prompt: `${number} 四捨五入到百位，約是多少？`,
+      answer: String(answer),
+      choices: buildNumberChoices(answer, rng, 200),
+      explanation: `看十位數字決定百位要不要進位，${number} 約是 ${answer}。`,
+      tip: '四捨五入到百位時，看十位。',
+    });
+  }
+
+  if (typeIndex === 2) {
+    const a = 120 + Math.floor(rng() * 380);
+    const b = 12 + Math.floor(rng() * 28);
+    const answer = a * b;
+    return makeQuestion({
+      subject: 'math', grade, domain: '三位數乘兩位數',
+      prompt: `${a} × ${b} = ?`,
+      answer: String(answer),
+      choices: buildNumberChoices(answer, rng, Math.max(120, Math.round(answer / 8))),
+      explanation: `可把 ${b} 分成十位和個位分別相乘，再相加，答案是 ${answer}。`,
+      tip: '乘兩位數時，先乘個位，再乘十位。',
+    });
+  }
+
+  if (typeIndex === 3) {
+    const divisor = 12 + Math.floor(rng() * 18);
+    const quotient = 8 + Math.floor(rng() * 42);
+    const dividend = divisor * quotient;
+    return makeQuestion({
+      subject: 'math', grade, domain: '除以兩位數',
+      prompt: `${dividend} ÷ ${divisor} = ?`,
+      answer: String(quotient),
+      choices: buildNumberChoices(quotient, rng, 10),
+      explanation: `因為 ${divisor} × ${quotient} = ${dividend}，所以商是 ${quotient}。`,
+      tip: '除法可用乘法回推檢查。',
+    });
+  }
+
+  if (typeIndex === 4) {
+    const a = 20 + Math.floor(rng() * 50);
+    const b = 2 + Math.floor(rng() * 8);
+    const c = 4 + Math.floor(rng() * 12);
+    const answer = a + b * c;
+    return makeQuestion({
+      subject: 'math', grade, domain: '四則混合',
+      prompt: `${a} + ${b} × ${c} = ?`,
+      answer: String(answer),
+      choices: buildNumberChoices(answer, rng, 20),
+      explanation: `先算乘法 ${b} × ${c} = ${b * c}，再加 ${a}，答案是 ${answer}。`,
+      tip: '沒有括號時，先乘除、後加減。',
+    });
+  }
+
+  if (typeIndex === 5) {
+    const denominator = pick([5, 6, 8, 10, 12], rng);
+    const a = 1 + Math.floor(rng() * (denominator - 2));
+    const b = 1 + Math.floor(rng() * (denominator - a - 1));
+    const answer = fraction(a + b, denominator);
+    return makeQuestion({
+      subject: 'math', grade, domain: '同分母分數加法',
+      prompt: `${a}/${denominator} + ${b}/${denominator} = ?`,
+      answer,
+      choices: choicesFrom(answer, [`${a + b}/${denominator + denominator}`, `${a}/${denominator}`, `${b}/${denominator}`], rng),
+      explanation: `分母相同，分母不變，分子相加：${a}+${b}=${a + b}，答案是 ${answer}。`,
+      tip: '同分母分數加法只加分子。',
+    });
+  }
+
+  if (typeIndex === 6) {
+    const denominator = pick([6, 8, 10, 12], rng);
+    const b = 1 + Math.floor(rng() * (denominator - 2));
+    const a = b + 1 + Math.floor(rng() * (denominator - b - 1));
+    const answer = fraction(a - b, denominator);
+    return makeQuestion({
+      subject: 'math', grade, domain: '同分母分數減法',
+      prompt: `${a}/${denominator} - ${b}/${denominator} = ?`,
+      answer,
+      choices: choicesFrom(answer, [`${a - b}/${denominator + denominator}`, `${a}/${denominator}`, `${b}/${denominator}`], rng),
+      explanation: `分母相同，分母不變，分子相減：${a}-${b}=${a - b}，答案是 ${answer}。`,
+      tip: '同分母分數減法只減分子。',
+    });
+  }
+
+  if (typeIndex === 7) {
+    const a = (120 + Math.floor(rng() * 780)) / 10;
+    const b = pick([1.2, 2.5, 3.4, 4.8, 5.6, 7.5], rng);
+    const answer = formatDecimal(a + b);
+    return makeQuestion({
+      subject: 'math', grade, domain: '小數加法',
+      prompt: `${formatDecimal(a)} + ${formatDecimal(b)} = ?`,
+      answer,
+      choices: choicesFrom(answer, [formatDecimal(a + b + 1), formatDecimal(a + b - 0.1), String(Math.round(a + b))], rng),
+      explanation: `小數點對齊相加，答案是 ${answer}。`,
+      tip: '小數直式要把小數點對齊。',
+    });
+  }
+
+  if (typeIndex === 8) {
+    const b = pick([1.3, 2.4, 3.5, 4.6, 5.8], rng);
+    const a = b + (30 + Math.floor(rng() * 90)) / 10;
+    const answer = formatDecimal(a - b);
+    return makeQuestion({
+      subject: 'math', grade, domain: '小數減法',
+      prompt: `${formatDecimal(a)} - ${formatDecimal(b)} = ?`,
+      answer,
+      choices: choicesFrom(answer, [formatDecimal(a - b + 1), formatDecimal(a - b - 0.1), String(Math.round(a - b))], rng),
+      explanation: `小數點對齊相減，答案是 ${answer}。`,
+      tip: '位數不夠時，可以補 0 再減。',
+    });
+  }
+
+  if (typeIndex === 9) {
+    const a = pick([35, 40, 45, 55, 60, 75], rng);
+    const b = pick([25, 30, 35, 40, 45], rng);
+    const answer = a + b;
+    return makeQuestion({
+      subject: 'math', grade, domain: '角度計算',
+      prompt: `一個角由 ${a} 度和 ${b} 度合成，這個角共幾度？`,
+      answer: String(answer),
+      choices: buildNumberChoices(answer, rng, 12),
+      explanation: `${a} 度 + ${b} 度 = ${answer} 度。`,
+      tip: '合成角度用加法。',
+    });
+  }
+
+  if (typeIndex === 10) {
+    const length = 8 + Math.floor(rng() * 15);
+    const width = 3 + Math.floor(rng() * 10);
+    const answer = 2 * (length + width);
+    return makeQuestion({
+      subject: 'math', grade, domain: '長方形周長',
+      prompt: `長 ${length} 公分、寬 ${width} 公分的長方形，周長是多少公分？`,
+      answer: String(answer),
+      choices: buildNumberChoices(answer, rng, 16),
+      explanation: `長方形周長 = (${length}+${width}) × 2 = ${answer} 公分。`,
+      tip: '周長是繞外圍一圈的長度。',
+    });
+  }
+
+  if (typeIndex === 11) {
+    const length = 7 + Math.floor(rng() * 13);
+    const width = 4 + Math.floor(rng() * 9);
+    const answer = length * width;
+    return makeQuestion({
+      subject: 'math', grade, domain: '長方形面積',
+      prompt: `長 ${length} 公分、寬 ${width} 公分的長方形，面積是多少平方公分？`,
+      answer: String(answer),
+      choices: buildNumberChoices(answer, rng, 24),
+      explanation: `長方形面積 = 長 × 寬 = ${length} × ${width} = ${answer} 平方公分。`,
+      tip: '面積看裡面鋪滿幾個平方單位。',
+    });
+  }
+
+  if (typeIndex === 12) {
+    const length = 3 + Math.floor(rng() * 6);
+    const width = 2 + Math.floor(rng() * 5);
+    const height = 2 + Math.floor(rng() * 5);
+    const answer = length * width * height;
+    return makeQuestion({
+      subject: 'math', grade, domain: '體積初步',
+      prompt: `一個長方體長 ${length}、寬 ${width}、高 ${height}，可排幾個 1 立方公分小方塊？`,
+      answer: String(answer),
+      choices: buildNumberChoices(answer, rng, 18),
+      explanation: `${length} × ${width} × ${height} = ${answer}，所以能排 ${answer} 個小方塊。`,
+      tip: '一層的數量再乘上高度。',
+    });
+  }
+
+  const bread = 18 + Math.floor(rng() * 18);
+  const cake = bread + pick([4, 6, 8, 10, 12], rng);
+  const cookie = 12 + Math.floor(rng() * 12);
+  return makeQuestion({
+    subject: 'math', grade, domain: '統計圖讀值',
+    prompt: `麵包店今天賣出麵包 ${bread} 個、蛋糕 ${cake} 個、餅乾 ${cookie} 包，哪一項賣得最多？`,
+    answer: '蛋糕',
+    choices: ['蛋糕', '麵包', '餅乾', '三項一樣多'],
+    explanation: `蛋糕 ${cake} 個比麵包 ${bread} 個、餅乾 ${cookie} 包都多。`,
+    tip: '讀統計資料時，先比較數字大小。',
+  });
+}
+
 function generateGrade6MathQuestion({ grade = 'grade6', level = 1, wave = 1, streak = 0 } = {}, rng = Math.random) {
   const typeIndex = (level + wave + Math.floor(streak / 2) + Math.floor(rng() * 12)) % 14;
   if (typeIndex === 0) {
@@ -2382,6 +2638,7 @@ function generateMathQuestion({ grade = 'grade2', level = 1, wave = 1, streak = 
   const typeIndex = (level + wave + Math.floor(streak / 2) + Math.floor(rng() * 5)) % 8;
 
   if (grade === 'grade3') return generateGrade3MathQuestion({ grade, level, wave, streak }, rng);
+  if (grade === 'grade4') return generateGrade4MathQuestion({ grade, level, wave, streak }, rng);
   if (grade === 'grade6') return generateGrade6MathQuestion({ grade, level, wave, streak }, rng);
 
   if (grade === 'grade5') {

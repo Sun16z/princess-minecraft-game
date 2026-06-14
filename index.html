@@ -299,13 +299,13 @@ body.single-play #t1z{top:auto;bottom:7%;}
         移動 <kbd>A</kbd><kbd>D</kbd>　跳躍 <kbd>W</kbd>（連按兩下＝二段跳）　🎁道具 <kbd>S</kbd><br>
         答題 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd>
         <div class="gradeSel">題目年級：
-          <button class="gbtn" data-p="1" data-g="grade2">二下</button><button class="gbtn" data-p="1" data-g="grade3">三上</button><button class="gbtn active" data-p="1" data-g="grade5">五下</button><button class="gbtn" data-p="1" data-g="grade6">六上</button>
+          <button class="gbtn" data-p="1" data-g="grade2">二下</button><button class="gbtn" data-p="1" data-g="grade3">三上</button><button class="gbtn" data-p="1" data-g="grade4">四下</button><button class="gbtn active" data-p="1" data-g="grade5">五下</button><button class="gbtn" data-p="1" data-g="grade6">六上</button>
         </div></div>
       <div class="card p2c"><b>💫 玩家二：<span id="p2CardName">小客人</span></b><br>
         移動 <kbd>←</kbd><kbd>→</kbd>　跳躍 <kbd>↑</kbd>（連按兩下＝二段跳）　🎁道具 <kbd>↓</kbd><br>
         答題 <kbd>7</kbd><kbd>8</kbd><kbd>9</kbd><kbd>0</kbd>
         <div class="gradeSel">題目年級：
-          <button class="gbtn active" data-p="2" data-g="grade2">二下</button><button class="gbtn" data-p="2" data-g="grade3">三上</button><button class="gbtn" data-p="2" data-g="grade5">五下</button><button class="gbtn" data-p="2" data-g="grade6">六上</button>
+          <button class="gbtn active" data-p="2" data-g="grade2">二下</button><button class="gbtn" data-p="2" data-g="grade3">三上</button><button class="gbtn" data-p="2" data-g="grade4">四下</button><button class="gbtn" data-p="2" data-g="grade5">五下</button><button class="gbtn" data-p="2" data-g="grade6">六上</button>
         </div></div>
     </div>
     <div class="rules">
@@ -370,7 +370,7 @@ function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 //==================== 本機小孩檔案 ====================
 const PROFILE_STORE_KEY='pmgProfilesV1';
 const PROFILE_PREFIX='pmgProfileV1:';
-const PROFILE_GRADE_KEYS=['grade2','grade3','grade5','grade6'];
+const PROFILE_GRADE_KEYS=['grade2','grade3','grade4','grade5','grade6'];
 function makeProfileId(){return 'kid_'+Date.now().toString(36)+'_'+Math.floor(Math.random()*10000).toString(36);}
 function cleanProfileName(name){return String(name||'').replace(/[<>]/g,'').trim().slice(0,12);}
 function defaultProfileStore(){
@@ -779,7 +779,7 @@ function openQuiz(p,gold){
   }else{
     const gen=()=>{
       if(gold)return p.grade==='grade5'?hardG5Math()
-        :generateQuestion({mode:'math',grade:'grade2',level:1,wave:p.answeredCount+1,
+        :generateQuestion({mode:'math',grade:p.grade,level:1,wave:p.answeredCount+1,
           streak:p.streak,answeredCount:p.answeredCount,difficulty:'ace'});
       const mode=SUBJECT_CYCLE[p.answeredCount%SUBJECT_CYCLE.length];
       if(mode==='math'&&p.grade==='grade5'&&Math.random()<.25+.12*p.dLvl)return hardG5Math();
