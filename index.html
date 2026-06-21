@@ -133,6 +133,8 @@ body.reduced-fx *,body.reduced-fx *::before,body.reduced-fx *::after{transition:
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important;}
 }
+.screen .panel,.qbox,.smoothQuiz{will-change:transform,opacity;}
+body.reduced-fx .screen .panel,body.reduced-fx .qbox,body.reduced-fx .smoothQuiz{will-change:auto;}
 .shopBtn{font-family:inherit;font-size:12px;font-weight:bold;padding:4px 9px;margin:3px;
   background:#2e7d32;color:#fff;border:2px solid #7ae582;cursor:pointer;}
 .shopBtn.owned{background:#444;border-color:#888;color:#bbb;cursor:default;}
@@ -464,6 +466,50 @@ function applyExperienceSettings(){
   applyAudioLevels();
 }
 window.PMG_GET_EXPERIENCE=()=>Object.assign({},experience);
+function shouldReduceUiMotion(){
+  return experience.reducedFx||prefersReducedFx();
+}
+function clearUiMotion(el){
+  if(!el)return;
+  if(el.getAnimations)el.getAnimations().forEach(a=>a.cancel());
+  el.style.opacity='';
+  el.style.transform='';
+}
+function animateUiIn(el,mode){
+  if(!el||shouldReduceUiMotion()||typeof el.animate!=='function')return;
+  clearUiMotion(el);
+  const pop=mode==='pop';
+  el.animate([
+    {opacity:0,transform:'translate3d(0,'+(pop?'8px':'12px')+',0) scale('+(pop?'.965':'.985')+')'},
+    {opacity:1,transform:'translate3d(0,0,0) scale(1)'}
+  ],{duration:pop?190:230,easing:'cubic-bezier(.16,1,.3,1)'});
+}
+function showScreen(el,mode){
+  if(!el)return;
+  el.classList.remove('hidden');
+  animateUiIn(el.querySelector('.panel')||el,mode||'soft');
+}
+function hideScreen(el,after){
+  if(!el){if(after)after();return;}
+  const finish=()=>{
+    el.classList.add('hidden');
+    clearUiMotion(el.querySelector('.panel')||el);
+    if(after)after();
+  };
+  const panel=el.querySelector('.panel')||el;
+  if(shouldReduceUiMotion()||typeof panel.animate!=='function'){finish();return;}
+  clearUiMotion(panel);
+  const anim=panel.animate([
+    {opacity:1,transform:'translate3d(0,0,0) scale(1)'},
+    {opacity:.02,transform:'translate3d(0,8px,0) scale(.985)'}
+  ],{duration:130,easing:'cubic-bezier(.7,0,.84,0)'});
+  anim.onfinish=finish;
+}
+function playUiMotion(el,mode){
+  animateUiIn(el,mode||'pop');
+}
+window.PMG_PLAY_UI_MOTION=playUiMotion;
+window.PMG_REDUCED_FX=shouldReduceUiMotion;
 
 //==================== 本機小孩檔案 ====================
 const PROFILE_STORE_KEY='pmgProfilesV1';
@@ -945,6 +991,7 @@ function openQuiz(p,gold){
     b.onclick=()=>answerQuiz(p,i);box.appendChild(b);p.btns.push(b);
   });
   pn.classList.remove('hidden');
+  playUiMotion(pn.querySelector('.qbox'),'pop');
   sfx.block();
   if(gold)tone(1047,.15,'triangle',.12,.08);   // 挑戰題專屬音
 }
@@ -2025,7 +2072,7 @@ function showEnd(){
     stats.appendChild(d);
   }
   document.getElementById('endTown').textContent=townRewardText(rewardRows);
-  document.getElementById('endScr').classList.remove('hidden');
+  showScreen(document.getElementById('endScr'),'pop');
 }
 function startSmoothVersion(){
   activeStorageProfileId=selectedProfileIds[1];
@@ -2054,31 +2101,36 @@ function exitSmoothVersion(){
   document.getElementById('wrap').classList.remove('smooth-mode');
   document.body.classList.remove('minecraft-play');
   document.getElementById('smooth3dLayer').classList.add('hidden');
-  document.getElementById('startScr').classList.remove('hidden');
+  document.getElementById('btnStart').disabled=false;
+  showScreen(document.getElementById('startScr'),'soft');
   keys.clear();document.body.classList.remove('single-play');state='start';
 }
 document.getElementById('btnSmoothBack').onclick=exitSmoothVersion;
 document.getElementById('btnStart').onclick=()=>{
   initAudio();
-  document.getElementById('startScr').classList.add('hidden');
-  rememberSelections();
-  if(activeVersion==='smooth')startSmoothVersion();
-  else resetGame();
+  const btn=document.getElementById('btnStart');
+  if(btn.disabled)return;
+  btn.disabled=true;
+  hideScreen(document.getElementById('startScr'),()=>{
+    rememberSelections();
+    if(activeVersion==='smooth')startSmoothVersion();
+    else resetGame();
+    btn.disabled=false;
+  });
 };
 document.getElementById('btnAgain').onclick=()=>{
-  document.getElementById('endScr').classList.add('hidden');
-  resetGame();
+  hideScreen(document.getElementById('endScr'),resetGame);
 };
 function openTown(){
   initAudio();stopBGM();keys.clear();townTouchKeys.clear();
   activeStorageProfileId=selectedProfileIds[1];
   reloadTownState();updateTownHud();
-  townActionSig='';townOpen=true;document.getElementById('townScr').classList.remove('hidden');
+  townActionSig='';townOpen=true;showScreen(document.getElementById('townScr'),'soft');
 }
 document.getElementById('btnTown').onclick=openTown;
 document.getElementById('btnTown2').onclick=openTown;
 document.getElementById('btnTownBack').onclick=()=>{
-  townOpen=false;townTouchKeys.clear();document.getElementById('townScr').classList.add('hidden');};
+  townOpen=false;townTouchKeys.clear();hideScreen(document.getElementById('townScr'));};
 //==================== 手機觸控 ====================
 function bindTouch(id,down,up){
   const el=document.getElementById(id);

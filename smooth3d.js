@@ -715,6 +715,7 @@
       state.quizOpts.appendChild(btn);
     });
     state.quizBox.classList.remove('hidden');
+    if(typeof window.PMG_PLAY_UI_MOTION==='function')window.PMG_PLAY_UI_MOTION(state.quizBox,'pop');
     setPrompt('答對守護題就能收下「'+item.def.name+'」');
   }
 
