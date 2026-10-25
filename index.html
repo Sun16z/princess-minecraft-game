@@ -261,14 +261,14 @@ body.reduced-fx .screen .panel,body.reduced-fx .qbox,body.reduced-fx .smoothQuiz
   </div>
 
   <div id="quizP1" class="quiz hidden"><div class="qbox">
-    <div class="qtop"><span class="qtag"></span><span class="qwho" style="color:#9fe0ff">🌟 羅潔塔姐姐作答（按 1‑4）</span><span class="qtimer"></span></div>
+    <div class="qtop"><span class="qtag"></span><span class="qwho" style="color:#9fe0ff">🌟 公主姐姐作答（按 1‑4）</span><span class="qtimer"></span></div>
     <div class="qtext"></div>
     <div class="qtip"></div>
     <div class="qopts"></div>
     <div class="qexp hidden"></div>
   </div></div>
   <div id="quizP2" class="quiz hidden"><div class="qbox">
-    <div class="qtop"><span class="qtag"></span><span class="qwho" style="color:#a8baff">💫 羅潔塔妹妹作答（按 7/8/9/0）</span><span class="qtimer"></span></div>
+    <div class="qtop"><span class="qtag"></span><span class="qwho" style="color:#a8baff">💫 公主妹妹作答（按 7/8/9/0）</span><span class="qtimer"></span></div>
     <div class="qtext"></div>
     <div class="qtip"></div>
     <div class="qopts"></div>
@@ -339,7 +339,7 @@ body.reduced-fx .screen .panel,body.reduced-fx .qbox,body.reduced-fx .smoothQuiz
       </div>
     </details>
     <div class="cols">
-      <div class="card p1c"><b>🌟 玩家一：<span id="p1CardName">羅潔塔</span></b><br>
+      <div class="card p1c"><b>🌟 玩家一：<span id="p1CardName">小公主</span></b><br>
         移動 <kbd>A</kbd><kbd>D</kbd>　跳躍 <kbd>W</kbd>（連按兩下＝二段跳）　🎁道具 <kbd>S</kbd><br>
         答題 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd>
         <div class="gradeSel">題目年級：
@@ -523,7 +523,7 @@ function defaultProfileStore(){
     slot1:'kid_rosetta',
     slot2:'kid_guest',
     profiles:[
-      {id:'kid_rosetta',name:'羅潔塔',icon:'👑',grade:'grade5'},
+      {id:'kid_rosetta',name:'小公主',icon:'👑',grade:'grade5'},
       {id:'kid_guest',name:'小客人',icon:'⭐',grade:'grade2'}
     ]
   };
@@ -692,9 +692,9 @@ function makePlayer(name,cfg){
     usedQ:new Set(),flagMsgT:0,item:null,shield:false,magnetT:0,
     shakeT:0,alertT:0,atFlag:false,wrongList:[],dLvl:1,mcorr:0,mwrong:0,recentQ:[]},cfg);
 }
-const p1=makePlayer('羅潔塔姐姐',{spawn:64, dress:'#5bc8e8',dress2:'#3a9fc0',hair:'#f5e6a8',
+const p1=makePlayer('公主姐姐',{spawn:64, dress:'#5bc8e8',dress2:'#3a9fc0',hair:'#f5e6a8',
   keys:{l:'KeyA',r:'KeyD',j:'KeyW',atk:'KeyS'},ansKeys:['1','2','3','4'],hud:'#9fe0ff',idx:1});
-const p2=makePlayer('羅潔塔妹妹',{spawn:120, dress:'#5b8de8',dress2:'#3a64c0',hair:'#f5e6a8',
+const p2=makePlayer('公主妹妹',{spawn:120, dress:'#5b8de8',dress2:'#3a64c0',hair:'#f5e6a8',
   keys:{l:'ArrowLeft',r:'ArrowRight',j:'ArrowUp',atk:'ArrowDown'},ansKeys:['7','8','9','0'],hud:'#a8baff',idx:2});
 const players=[p1,p2];
 function isSingleMode(){return gameMode==='single';}
